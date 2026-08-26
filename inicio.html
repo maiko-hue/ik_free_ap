@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="manifest" href="manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Inicio - Banca Móvil</title>
+    <link rel="icon" href="img/favicon.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ==================================================
+           REGLAS DE REALISMO Y ANTI-SELECCIÓN (NATIVO)
+           ================================================== */
+        * {
+            -webkit-tap-highlight-color: transparent !important;
+            -webkit-touch-callout: none !important; 
+            -webkit-user-select: none !important; 
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+            outline: none !important;
+            box-sizing: border-box;
+        }
+
+        input, textarea {
+            -webkit-user-select: auto !important;
+            user-select: auto !important;
+        }
+
+        img {
+            pointer-events: none;
+            -webkit-user-drag: none;
+        }
+
+        button, a, .op-item, .account-item, .action-icon, .tabs-container {
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        :root {
+            --ibk-green: #00B14F;
+            --ibk-dark-blue: #002D72;
+            --qr-blue: #0137AB;
+            --bg-light: #f7f9fa;
+            --text-dark: #333333;
+            --text-muted: #666666;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            height: 100vh;
+            overflow: hidden;
+            overscroll-behavior-y: none; 
+        }
+
+        .mobile-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            background-color: white;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05); /* Suave sombra para desktop */
+        }
+
+        /* ==================================================
+           HEADER
+           ================================================== */
+        .header-inicio {
+            background-color: var(--ibk-green);
+            padding: clamp(10px, 3vw, 15px) clamp(15px, 4vw, 20px) 30px clamp(15px, 4vw, 20px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            z-index: 10;
+        }
+
+        .header-inicio svg {
+            width: clamp(20px, 5vw, 24px);
+            height: clamp(20px, 5vw, 24px);
+            stroke: white;
+            stroke-width: 2.5;
+            fill: none;
+            stroke-linecap: round;
+        }
+
+        .header-inicio .logo {
+            width: 100%;
+            max-width: 180px; 
+            height: auto;
+            max-height: 60px;
+            object-fit: contain;
+        }
+
+        /* ==================================================
+           PESTAÑAS (TABS)
+           ================================================== */
+        .tabs-container {
+            display: flex;
+            background-color: white;
+            border-radius: 20px 20px 0 0;
+            margin-top: -20px;
+            position: relative;
+            z-index: 11;
+            padding-top: 5px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+
+        .tab-btn {
+            flex: 1;
+            text-align: center;
+            padding: 15px 0;
+            font-size: clamp(13px, 3.5vw, 15px);
+            font-weight: 700;
+            color: var(--text-muted);
+            border-bottom: 3px solid #E5E5E5;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            color: var(--ibk-dark-blue);
+            border-bottom: 3px solid var(--ibk-dark-blue);
+        }
+
+        /* ==================================================
+           CONTENIDO SCROLL
+           ================================================== */
+        .scrollable-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 100px;
+            background-color: white;
+            overscroll-behavior-y: none;
+        }
+
+        .tab-view {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .tab-view.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* ==================================================
+           VISTA 1: MIS OPERACIONES
+           ================================================== */
+        .exchange-rate {
+            text-align: center;
+            font-size: clamp(10px, 2.5vw, 12px);
+            color: #888;
+            padding: 15px 0 5px 0;
+        }
+
+        .op-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: clamp(15px, 4vw, 20px) clamp(5px, 2vw, 10px);
+            padding: 15px clamp(10px, 4vw, 20px);
+        }
+
+        .op-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .op-icon-box {
+            width: clamp(50px, 15vw, 60px);
+            height: clamp(50px, 15vw, 60px);
+            background-color: white;
+            border: 1.5px solid #F0F0F0;
+            border-radius: clamp(14px, 4vw, 18px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        /* Caja Agregar Producto: Fondo Verde Claro y borde verde oscuro */
+        .op-icon-box.bg-green {
+            background-color: #00D13D;
+            border: 1px solid #025D24;
+        }
+
+        .op-icon-box img {
+            width: clamp(26px, 8vw, 32px);
+            height: clamp(26px, 8vw, 32px);
+            object-fit: contain;
+        }
+
+        .op-text {
+            font-size: clamp(10px, 2.8vw, 11px);
+            font-weight: 600;
+            color: var(--text-dark);
+            line-height: 1.2;
+            width: 110%;
+        }
+
+        .badge-nuevo, .badge-plin {
+            position: absolute;
+            color: white;
+            font-size: clamp(8px, 2vw, 9px);
+            font-weight: 800;
+            border: 1.5px solid white;
+        }
+
+        .badge-nuevo {
+            top: -8px;
+            right: -12px;
+            background-color: var(--ibk-dark-blue);
+            padding: 3px 6px;
+            border-radius: 10px;
+        }
+
+        .badge-plin {
+            bottom: -6px;
+            right: -6px;
+            background-color: #00D3A0;
+            padding: 2px 5px;
+            border-radius: 6px;
+        }
+
+        /* ==================================================
+           VISTA 2: MIS PRODUCTOS
+           ================================================== */
+        .card-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px clamp(15px, 4vw, 20px);
+            border-bottom: 2px solid #F0F0F0;
+        }
+
+        .ch-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: clamp(12px, 3.5vw, 14px);
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .ch-left img { width: clamp(18px, 5vw, 22px); height: clamp(18px, 5vw, 22px); }
+
+        .ch-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .action-icon {
+            width: clamp(26px, 7vw, 32px);
+            height: clamp(26px, 7vw, 32px);
+            border: none;
+            padding: 0;
+            background: transparent;
+        }
+
+        .accounts-list {
+            padding: 10px clamp(15px, 4vw, 20px);
+        }
+
+        .account-item {
+            display: flex;
+            align-items: center;
+            padding: clamp(12px, 4vw, 18px) 0;
+            border-bottom: 1.5px solid #F0F0F0;
+        }
+        .account-item:last-child { border-bottom: none; }
+
+        .acc-icon {
+            width: clamp(30px, 8vw, 35px);
+            height: clamp(30px, 8vw, 35px);
+            margin-right: 15px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .acc-info { flex: 1; }
+        .acc-name { font-size: clamp(12px, 3.5vw, 14px); font-weight: 600; color: var(--text-dark); margin-bottom: 2px; }
+        .acc-balance { font-size: clamp(15px, 4.5vw, 18px); font-weight: 800; color: var(--text-dark); margin-bottom: 2px; letter-spacing: 0.5px; }
+        .acc-sub { font-size: clamp(10px, 3vw, 12px); color: var(--text-muted); }
+        .acc-arrow { font-size: 18px; color: #CCC; font-weight: bold; }
+
+        .add-product-dashed {
+            margin: 10px clamp(15px, 4vw, 20px);
+            border: 2px dashed #E0E0E0;
+            border-radius: 12px;
+            padding: clamp(15px, 4vw, 20px);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+        }
+        .add-product-dashed .plus-icon {
+            font-size: clamp(20px, 6vw, 24px);
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+        .add-product-dashed .add-title {
+            font-size: clamp(12px, 3.5vw, 14px);
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 3px;
+        }
+        .add-product-dashed .add-sub {
+            font-size: clamp(10px, 3vw, 12px);
+            color: var(--text-muted);
+        }
+
+        /* ==================================================
+           ELEMENTOS COMPARTIDOS (Píldoras y Finanzas)
+           ================================================== */
+        .shared-bottom-content {
+            padding: 20px clamp(15px, 4vw, 20px);
+        }
+
+        .pills-container {
+            display: flex;
+            gap: clamp(8px, 2vw, 10px);
+            margin-bottom: 30px;
+        }
+
+        .pill-btn {
+            flex: 1;
+            background-color: #EBF8F2;
+            color: var(--ibk-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 5px;
+            border-radius: 30px;
+            font-size: clamp(9.5px, 2.5vw, 11px);
+            font-weight: 700;
+        }
+        
+        .pill-btn img { 
+            width: clamp(18px, 5vw, 24px); 
+            height: clamp(18px, 5vw, 24px); 
+            object-fit: contain; 
+        }
+
+        .finanzas-header {
+            font-size: clamp(15px, 4.5vw, 18px);
+            font-weight: 800;
+            color: var(--ibk-green);
+            margin-bottom: 15px;
+        }
+
+        .finanzas-banner {
+            width: 100%;
+            border-radius: 15px;
+            object-fit: cover;
+        }
+
+        /* ==================================================
+           BOTTOM NAV & FAB QR
+           ================================================== */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 480px;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0 15px 0;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
+            z-index: 100;
+            border-top: 2px solid var(--ibk-green);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: none;
+            border: none;
+            color: #A0A0A0;
+            font-size: clamp(9px, 2.5vw, 10px);
+            font-weight: 700;
+            font-family: inherit;
+        }
+        
+        .nav-item.active {
+            color: var(--ibk-green);
+        }
+
+        .nav-icon, .nav-icon-img {
+            width: clamp(18px, 5vw, 22px);
+            height: clamp(18px, 5vw, 22px);
+            margin-bottom: 4px;
+        }
+
+        .nav-icon { fill: currentColor; }
+        .nav-icon-img { object-fit: contain; opacity: 0.5; }
+
+        .qr-fab-container {
+            position: relative;
+            width: 60px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .qr-fab {
+            position: absolute;
+            top: -35px;
+            width: 55px;
+            height: 55px;
+            background-color: var(--qr-blue) !important;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(1, 55, 171, 0.4);
+            border: 4px solid white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-wrapper">
+
+        <!-- HEADER VERDE -->
+        <header class="header-inicio">
+            <button class="menu-btn" style="background:none; border:none; padding:0; pointer-events:auto;" onclick="window.location.href='config.html'">
+                <svg viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+            </button>
+            <img src="img/logo.svg" alt="Interbank" class="logo" draggable="false" oncontextmenu="return false;">
+            <button class="bell-btn" style="background:none; border:none; padding:0; pointer-events:auto;">
+                <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            </button>
+        </header>
+
+        <!-- TABS SUPERIORES -->
+        <div class="tabs-container">
+            <div class="tab-btn active" id="btnTabOperaciones" onclick="switchTab('operaciones')">Mis operaciones</div>
+            <div class="tab-btn" id="btnTabProductos" onclick="switchTab('productos')">Mis productos</div>
+        </div>
+
+        <!-- CONTENEDOR DESLIZABLE -->
+        <div class="scrollable-content">
+
+            <!-- ==============================================
+                 VISTA 1: MIS OPERACIONES
+                 ============================================== -->
+            <div id="viewOperaciones" class="tab-view active">
+                
+                <div class="exchange-rate">T.C. referencial: Compra: 3.323 | Venta: 3.474</div>
+
+                <div class="op-grid">
+                    <!-- Fila 1 -->
+                    <div class="op-item" onclick="window.location.href='trcontac.html'">
+                        <div class="op-icon-box"><img src="img/plin.png" alt="Plin" draggable="false" oncontextmenu="return false;"></div>
+                        <div class="op-text">Plinear</div>
+                    </div>
+                    <div class="op-item" onclick="window.location.href='trans.html'">
+                        <div class="op-icon-box"><img src="img/transferencias.png" alt="Transferir" draggable="false" oncontextmenu="return false;"></div>
+                        <div class="op-text">Transferir dinero</div>
+                    </div>
+                    <div class="op-item" onclick="window.location.href='serv.html'">
+                        <div class="op-icon-box"><img src="img/servicios.png" alt="Servicios" draggable="false" oncontextmenu="return false;"></div>
+                        <div class="op-text">Pagar servicios</div>
+                    </div>
+                    <div class="op-item">
+                        <div class="op-icon-box">
+                            <img src="img/ver_datos.png" alt="Ver datos" draggable="false" oncontextmenu="return false;">
+                            <div class="badge-nuevo">Nuevo</div>
+                        </div>
+                        <div class="op-text">Ver datos de tarjeta</div>
+                    </div>
+
+                    <!-- Fila 2 -->
+                    <div class="op-item" onclick="window.location.href='recel.html'">
+                        <div class="op-icon-box"><img src="img/recargas.png" alt="Recargas" draggable="false" oncontextmenu="return false;"></div>
+                        <div class="op-text">Recargar celular</div>
+                    </div>
+                    <div class="op-item">
+                        <div class="op-icon-box">
+                            <img src="img/retiros.jpg" alt="Transporte" draggable="false" oncontextmenu="return false;">
+                            <div class="badge-plin">Plin</div>
+                        </div>
+                        <div class="op-text">Recargar transporte</div>
+                    </div>
+                    <div class="op-item">
+                        <div class="op-icon-box bg-green">
+                            <i class="fa-solid fa-credit-card" style="color: #025D24; font-size: 18px; position:relative;">
+                                <i class="fa-solid fa-plus" style="position:absolute; bottom:-4px; right:-6px; background:#025D24; color: white; border-radius:50%; font-size:11px; padding:2px;"></i>
+                            </i>
+                        </div>
+                        <div class="op-text">Agregar producto</div>
+                    </div>
+                    <div class="op-item">
+                        <div class="op-icon-box"><img src="img/ver_mas.png" alt="Ver más" draggable="false" oncontextmenu="return false;"></div>
+                        <div class="op-text">Ver más opciones</div>
+                    </div>
+                </div>
+
+                <!-- Elementos Inferiores (Píldoras y Banner Finanzas) -->
+                <div class="shared-bottom-content">
+                    <div class="pills-container">
+                        <div class="pill-btn">
+                            <img src="img/whatsapp.png" alt="WA" draggable="false" oncontextmenu="return false;"> ¡Plinea por Whatsapp aquí!
+                        </div>
+                        <div class="pill-btn">
+                            <img src="img/millas.png" alt="Millas" draggable="false" oncontextmenu="return false;"> Millas Benefit
+                        </div>
+                    </div>
+
+                    <div class="finanzas-header">Mis finanzas</div>
+                    <img src="img/banner_finanzas.png" class="finanzas-banner" alt="Mis Finanzas" draggable="false" oncontextmenu="return false;">
+                </div>
+            </div>
+
+            <!-- ==============================================
+                 VISTA 2: MIS PRODUCTOS
+                 ============================================== -->
+            <div id="viewProductos" class="tab-view">
+                
+                <!-- Cabecera Tarjeta -->
+                <div class="card-header-bar">
+                    <div class="ch-left">
+                        <img src="img/ver_datos_2.png" alt="Card" draggable="false" oncontextmenu="return false;"> Ver datos de tarjeta
+                    </div>
+                    <div class="ch-right">
+                        <!-- Iconos de Acción SVG Grandes y sin borde -->
+                        <img src="img/lapiz2.svg" alt="Edit" class="action-icon" draggable="false" oncontextmenu="return false;">
+                        <img src="img/ojocerrado.svg" alt="Eye" class="action-icon" id="eye-toggle" onclick="toggleBalances()" draggable="false" oncontextmenu="return false;">
+                    </div>
+                </div>
+
+                <!-- Lista Cuentas -->
+                <div class="accounts-list">
+                    <div class="account-item" onclick="window.location.href='infoc.html?id=1'">
+                        <img src="img/cuenta_ahorro.png" class="acc-icon" alt="Soles" draggable="false" oncontextmenu="return false;">
+                        <div class="acc-info">
+                            <div class="acc-name" id="nameAcc1">Cuenta Simple Soles</div>
+                            <div class="acc-balance balance-text" id="balAcc1" data-currency="S/ " data-amount="S/ 10,000.00">S/ ●●●●●●●●</div>
+                            <div class="acc-sub">Saldo disponible</div>
+                        </div>
+                        <div class="acc-arrow">›</div>
+                    </div>
+
+                    <div class="account-item" onclick="window.location.href='infoc.html?id=2'">
+                        <img src="img/cuenta_ahorro.png" class="acc-icon" alt="Dólares" draggable="false" oncontextmenu="return false;">
+                        <div class="acc-info">
+                            <div class="acc-name" id="nameAcc2">Cuenta Simple Dólares</div>
+                            <div class="acc-balance balance-text" id="balAcc2" data-currency="$ " data-amount="$ 10,000.00">$ ●●●●●●●●</div>
+                            <div class="acc-sub">Saldo disponible</div>
+                        </div>
+                        <div class="acc-arrow">›</div>
+                    </div>
+
+                    <div class="account-item">
+                        <img src="img/cuenta_inversion.png" class="acc-icon" alt="Inversiones" draggable="false" oncontextmenu="return false;">
+                        <div class="acc-info">
+                            <div class="acc-name">Mis Inversiones</div>
+                            <div class="acc-sub">Explorar productos</div>
+                        </div>
+                        <div class="acc-arrow">›</div>
+                    </div>
+                </div>
+
+                <!-- Botón Agregar Producto Punteado -->
+                <div class="add-product-dashed">
+                    <div class="plus-icon">+</div>
+                    <div>
+                        <div class="add-title">Agregar nuevo producto</div>
+                        <div class="add-sub">Obtén una cuenta, tarjeta y más.</div>
+                    </div>
+                </div>
+
+                <!-- Elementos Inferiores (Iguales) -->
+                <div class="shared-bottom-content">
+                    <div class="pills-container">
+                        <div class="pill-btn">
+                            <img src="img/whatsapp.png" alt="WA" draggable="false" oncontextmenu="return false;"> ¡Plinea por Whatsapp aquí!
+                        </div>
+                        <div class="pill-btn">
+                            <img src="img/millas.png" alt="Millas" draggable="false" oncontextmenu="return false;"> Millas Benefit
+                        </div>
+                    </div>
+
+                    <div class="finanzas-header">Mis finanzas</div>
+                    <img src="img/banner_finanzas.png" class="finanzas-banner" alt="Mis Finanzas" draggable="false" oncontextmenu="return false;">
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ==============================================
+             BOTTOM NAVIGATION
+             ============================================== -->
+        <nav class="bottom-nav">
+            <button class="nav-item active">
+                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <span>Inicio</span>
+            </button>
+            <button class="nav-item">
+                <svg class="nav-icon" style="opacity:0.5;" viewBox="0 0 24 24"><path d="M8 7h12m0 0l-4-4m4 4l-4 4m4 6H4m0 0l4 4m-4-4l4-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>Movimientos</span>
+            </button>
+            
+            <div class="qr-fab-container">
+                <div class="qr-fab">
+                    <img src="img/qr.png" alt="QR" style="width: 26px; height: 26px; object-fit: contain;" draggable="false" oncontextmenu="return false;">
+                </div>
+            </div>
+
+            <button class="nav-item">
+                <img src="img/beneficios.webp" alt="Beneficios" class="nav-icon-img" draggable="false" oncontextmenu="return false;">
+                <span>Beneficios</span>
+            </button>
+            <button class="nav-item">
+                <img src="img/para_ti.webp" alt="Para ti" class="nav-icon-img" draggable="false" oncontextmenu="return false;">
+                <span>Para ti</span>
+            </button>
+        </nav>
+
+    </div>
+
+    <!-- ==============================================
+         LÓGICA JAVASCRIPT ORIGINAL
+         ============================================== -->
+    <script>
+        const DEFAULTS = {
+            acc1: { name: "Cuenta Simple Soles", curr: "S/", bal: "1000.00" },
+            acc2: { name: "Cuenta Simple Dolares", curr: "$", bal: "1000.00" }
+        };
+
+        // --- CARGAR SALDOS DINÁMICOS ---
+        document.addEventListener('DOMContentLoaded', () => {
+            for(let i=1; i<=2; i++) {
+                let name = localStorage.getItem(`ibk_acc${i}_name`) || DEFAULTS[`acc${i}`].name;
+                let curr = localStorage.getItem(`ibk_acc${i}_curr`) || DEFAULTS[`acc${i}`].curr;
+                let bal = localStorage.getItem(`ibk_acc${i}_bal`) || DEFAULTS[`acc${i}`].bal;
+                
+                let formattedBal = parseFloat(bal).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+                // Establece el nombre
+                document.getElementById(`nameAcc${i}`).innerText = name;
+                
+                // Prepara la info en atributos para la función del Ojito
+                let balanceElement = document.getElementById(`balAcc${i}`);
+                balanceElement.setAttribute('data-currency', curr + ' ');
+                balanceElement.setAttribute('data-amount', `${curr} ${formattedBal}`);
+                
+                // Iniciar oculto por defecto
+                balanceElement.innerText = `${curr} ••••••••`;
+            }
+        });
+
+        // --- SISTEMA DE PESTAÑAS (TABS) ---
+        function switchTab(tabName) {
+            // Quitar activos de los botones
+            document.getElementById('btnTabOperaciones').classList.remove('active');
+            document.getElementById('btnTabProductos').classList.remove('active');
+            
+            // Ocultar vistas
+            document.getElementById('viewOperaciones').classList.remove('active');
+            document.getElementById('viewProductos').classList.remove('active');
+
+            // Mostrar el solicitado
+            if(tabName === 'operaciones') {
+                document.getElementById('btnTabOperaciones').classList.add('active');
+                document.getElementById('viewOperaciones').classList.add('active');
+            } else {
+                document.getElementById('btnTabProductos').classList.add('active');
+                document.getElementById('viewProductos').classList.add('active');
+            }
+        }
+
+        // --- LÓGICA DEL OJITO (MOSTRAR/OCULTAR) ---
+        function toggleBalances() {
+            const eyeIcon = document.getElementById('eye-toggle');
+            const balances = document.querySelectorAll('.balance-text');
+            
+            const isClosed = eyeIcon.src.includes('ojocerrado.svg');
+
+            if (isClosed) {
+                // Abrir ojo -> Mostrar saldos
+                eyeIcon.src = 'img/ojoabierto.svg';
+                balances.forEach(b => {
+                    b.innerText = b.getAttribute('data-amount');
+                });
+            } else {
+                // Cerrar ojo -> Ocultar saldos
+                eyeIcon.src = 'img/ojocerrado.svg';
+                balances.forEach(b => {
+                    const currency = b.getAttribute('data-currency');
+                    b.innerText = currency + '••••••••';
+                });
+            }
+        }
+    </script>
+</body>
+</html>

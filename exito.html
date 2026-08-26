@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="manifest" href="manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Constancia - Plin</title>
+    <link rel="icon" href="img/favicon.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <link rel="stylesheet" href="styles.css">
+
+    <style>
+        * {
+    /* Elimina el recuadro azul al hacer clic en celulares */
+    -webkit-tap-highlight-color: transparent;
+    outline: none !important;
+    
+    /* Bloquea la selección de texto en toda la app */
+    -webkit-user-select: none; 
+    -moz-user-select: none; 
+    -ms-user-select: none; 
+    user-select: none; 
+}
+
+/* Excepción para que sí se pueda seleccionar/escribir en los inputs */
+input, textarea {
+    -webkit-user-select: auto;
+    -moz-user-select: auto;
+    -ms-user-select: auto;
+    user-select: auto;
+}
+        /* HEADER - Ajuste de sombra pedido */
+        .header { display: flex; justify-content: center; align-items: center; padding: 15px 20px; background-color: #ffffff; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.06); border-bottom: none; z-index: 10; }
+        .header-title { font-size: 16px; font-weight: 700; color: #000; }
+
+        /* CONTENIDO PRINCIPAL */
+        .content { flex: 1; overflow-y: auto; padding-bottom: 120px; /* Incrementado para no ocultar botones finales */ display: flex; flex-direction: column; align-items: center; }
+        .content::-webkit-scrollbar { width: 0px; background: transparent; }
+
+        /* SECCIÓN SUPERIOR DE ÉXITO */
+        .success-header { display: flex; flex-direction: column; align-items: center; margin-top: 25px; margin-bottom: 25px; }
+        .success-icon { width: 55px; height: 55px; object-fit: contain; margin-bottom: 10px; }
+        .success-text { font-size: 16px; color: #000; font-weight: 400; margin-bottom: 5px; }
+        
+        /* Ajuste de alineación para subir el símbolo de la moneda */
+        .amount-display { color: #00b551; display: flex; align-items: flex-start; justify-content: center; }
+        .amount-currency { font-size: 22px; font-weight: 600; margin-right: 4px; margin-top: 4px; }
+        .amount-value { font-size: 42px; font-weight: 600; letter-spacing: -1px; line-height: 1; }
+
+        /* TICKET CON BORDES ONDULADOS (SCALLOPED) - Color #F3F5F4 */
+        .ticket {
+            position: relative;
+            background-color: #F3F5F4;
+            width: 85%;
+            padding: 25px 20px;
+            margin-bottom: 30px;
+        }
+        /* Ondas Superiores */
+        .ticket::before {
+            content: ""; position: absolute; top: -10px; left: 0; right: 0; height: 10px;
+            background-size: 20px 20px;
+            background-image: radial-gradient(circle at 10px 10px, #F3F5F4 10px, transparent 11px);
+        }
+        /* Ondas Inferiores */
+        .ticket::after {
+            content: ""; position: absolute; bottom: -10px; left: 0; right: 0; height: 10px;
+            background-size: 20px 20px;
+            background-image: radial-gradient(circle at 10px 0, #F3F5F4 10px, transparent 11px);
+        }
+
+        /* DATOS DEL TICKET */
+        .ticket-row { margin-bottom: 15px; }
+        .ticket-row:last-child { margin-bottom: 0; }
+        
+        .ticket-label { font-size: 14.5px; font-weight: 700; color: #000; margin-bottom: 2px; }
+        .ticket-value { font-size: 14.5px; font-weight: 400; color: #222; }
+        
+        .badge-gratis { background-color: #00b551; color: white; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 700; display: inline-block; margin-top: 2px; }
+
+        /* ESTILO PARA EL GRUPO DE TEXTO DEL DESTINATARIO */
+        .text-group { display: flex; flex-direction: column; gap: 2px; }
+
+        /* BOTONES */
+        .actions-container { width: 85%; display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+        
+        .btn-enviar { background-color: #00b551; color: white; border: none; width: 100%; padding: 15px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .btn-enviar:active { background-color: #009e47; }
+        
+        .btn-volver { background-color: white; color: #00b551; border: 1.5px solid #00b551; width: 100%; padding: 14px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.2s; text-decoration: none; display: flex; justify-content: center; align-items: center;}
+        .btn-volver:active { background-color: #f0fdf4; }
+
+    </style>
+</head>
+<body>
+
+    <div class="mobile-wrapper" id="captureArea">
+
+        <header class="header" id="topHeader">
+            <div class="header-title">Constancia</div>
+        </header>
+
+        <div class="content">
+            
+            <div class="success-header">
+                <img src="img/plin-voucher.webp" alt="Plin" class="success-icon">
+                <div class="success-text">¡Pago exitoso!</div>
+                <div class="amount-display">
+                    <span class="amount-currency">S/</span>
+                    <span class="amount-value" id="finalMonto">0.00</span>
+                </div>
+            </div>
+
+            <div class="ticket">
+                
+                <div class="ticket-row">
+                    <div class="ticket-label">Enviado a:</div>
+                    <div class="ticket-value text-group">
+                        <span id="finalNombre">Nombre Destino</span>
+                        <span id="finalCelular" style="color: #666; font-size: 14px; display: none;">999 999 999</span>
+                    </div>
+                </div>
+
+                <div class="ticket-row">
+                    <div class="ticket-label">Destino:</div>
+                    <div class="ticket-value" id="finalDestino">Plin</div>
+                </div>
+
+                <div class="ticket-row">
+                    <div class="ticket-label">Comisión:</div>
+                    <div class="badge-gratis">GRATIS</div>
+                </div>
+
+                <div class="ticket-row">
+                    <div class="ticket-label">Fecha y hora:</div>
+                    <div class="ticket-value" id="finalFechaHora">-- --- ---- &nbsp; --:-- --</div>
+                </div>
+
+                <div class="ticket-row">
+                    <div class="ticket-label">Código de operación:</div>
+                    <div class="ticket-value" id="finalCodigo">00000000</div>
+                </div>
+
+            </div>
+
+            <div class="actions-container" id="actionButtons">
+                <button class="btn-enviar" onclick="enviarConstancia()">Enviar constancia</button>
+                <a href="inicio.html" class="btn-volver">Volver a Plin</a>
+            </div>
+
+        </div>
+
+        <nav class="bottom-nav" id="bottomNav">
+            <button class="nav-item active" onclick="window.location.href='inicio.html'">
+                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <span>Inicio</span>
+            </button>
+            <button class="nav-item">
+                <img src="img/transferencias.jpg" alt="Operaciones" class="nav-icon-op">
+                <span>Operaciones</span>
+            </button>
+            <div class="qr-fab-container">
+                <div class="qr-fab">
+                    <img src="img/qr.png" alt="QR" style="width: 26px; height: 26px; object-fit: contain;">
+                </div>
+            </div>
+            <button class="nav-item">
+                <img src="img/beneficios.webp" alt="Beneficios" class="nav-icon-img">
+                <span>Beneficios</span>
+            </button>
+            <button class="nav-item">
+                <img src="img/para_ti.webp" alt="Para ti" class="nav-icon-img">
+                <span>Para ti</span>
+            </button>
+        </nav>
+
+    </div>
+
+    <script>
+        // --- 1. CARGAR DATOS DINÁMICOS ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Leer datos del almacenamiento local
+            const montoEnvio = localStorage.getItem('ibk_plin_monto') || '0.00';
+            const nombreDestino = localStorage.getItem('ibk_plin_nombre') || 'Destinatario';
+            const destinoBanco = localStorage.getItem('ibk_plin_destino') || 'Plin';
+            const isQR = localStorage.getItem('ibk_plin_isQR') === 'true';
+            
+            // Asignar monto y formatearlo a 2 decimales
+            document.getElementById('finalMonto').innerText = parseFloat(montoEnvio).toFixed(2);
+            document.getElementById('finalNombre').innerText = nombreDestino;
+            document.getElementById('finalDestino').innerText = destinoBanco;
+
+            // Lógica para mostrar u ocultar el celular
+            if (!isQR) {
+                let celularDestino = localStorage.getItem('ibk_plin_celular') || "999999999";
+                if(celularDestino.length === 9) {
+                    celularDestino = `${celularDestino.slice(0,3)} ${celularDestino.slice(3,6)} ${celularDestino.slice(6,9)}`;
+                }
+                document.getElementById('finalCelular').innerText = celularDestino;
+                document.getElementById('finalCelular').style.display = 'block';
+            } else {
+                document.getElementById('finalCelular').style.display = 'none';
+            }
+
+            // Generar Código de Operación Aleatorio (8 dígitos)
+            const opCode = Math.floor(10000000 + Math.random() * 90000000);
+            document.getElementById('finalCodigo').innerText = `0${opCode}`.slice(-8); // Asegura 8 dígitos
+
+            // Generar Fecha y Hora Actual
+            const now = new Date();
+            const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+            const day = now.getDate().toString().padStart(2, '0');
+            const month = months[now.getMonth()];
+            const year = now.getFullYear();
+            
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            
+            const timeStr = `${hours.toString().padStart(2, '0')}:${minutes} ${ampm}`;
+            
+            // Formato: "25 feb 2026   02:41 PM"
+            document.getElementById('finalFechaHora').innerHTML = `${day} ${month} ${year} &nbsp;&nbsp; ${timeStr}`;
+        });
+
+        // --- 2. LÓGICA PARA COMPARTIR CONSTANCIA (html2canvas) ---
+        function enviarConstancia() {
+            const captureArea = document.getElementById('captureArea');
+            const actionButtons = document.getElementById('actionButtons');
+            const bottomNav = document.getElementById('bottomNav');
+            
+            // Ocultar botones, menú y notificación antes de la foto
+            actionButtons.style.display = 'none';
+            bottomNav.style.display = 'none';
+
+            // Pequeña pausa para que el navegador aplique los estilos ocultos
+            setTimeout(() => {
+                html2canvas(captureArea, {
+                    scale: 2, 
+                    backgroundColor: '#ffffff' // Fondo blanco de la app
+                }).then(canvas => {
+                    canvas.toBlob(blob => {
+                        let nombreParaArchivo = document.getElementById('finalNombre').innerText.replace(/[^a-zA-Z0-9]/g, "_");
+                        const file = new File([blob], `Constancia_Plin_${nombreParaArchivo}.png`, { type: 'image/png' });
+                        
+                        // Función nativa de compartir del celular
+                        if (navigator.share) {
+                            navigator.share({
+                                title: `Constancia Plin a ${nombreParaArchivo}`,
+                                files: [file]
+                            }).then(() => {
+                                restaurarUI(actionButtons, bottomNav);
+                            }).catch(err => {
+                                console.log('Error al compartir:', err);
+                                restaurarUI(actionButtons, bottomNav);
+                            });
+                        } else {
+                            // Descargar automáticamente si está en PC
+                            const link = document.createElement('a');
+                            link.download = `Constancia_Plin_${nombreParaArchivo}.png`;
+                            link.href = canvas.toDataURL('image/png');
+                            link.click();
+                            restaurarUI(actionButtons, bottomNav);
+                        }
+                    });
+                });
+            }, 150); 
+        }
+
+        // Función auxiliar para regresar los botones a la pantalla tras capturar
+        function restaurarUI(actionButtons, bottomNav) {
+            actionButtons.style.display = 'flex';
+            bottomNav.style.display = 'flex';
+        }
+    </script>
+</body>
+</html>

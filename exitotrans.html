@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="manifest" href="manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Constancia - Transferencia</title>
+    <link rel="icon" href="img/favicon.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <link rel="stylesheet" href="styles.css">
+
+    <style>
+        * {
+    /* Elimina el recuadro azul al hacer clic en celulares */
+    -webkit-tap-highlight-color: transparent;
+    outline: none !important;
+    
+    /* Bloquea la selección de texto en toda la app */
+    -webkit-user-select: none; 
+    -moz-user-select: none; 
+    -ms-user-select: none; 
+    user-select: none; 
+}
+
+/* Excepción para que sí se pueda seleccionar/escribir en los inputs */
+input, textarea {
+    -webkit-user-select: auto;
+    -moz-user-select: auto;
+    -ms-user-select: auto;
+    user-select: auto;
+}
+        /* HEADER - Sombra */
+        .header { display: flex; justify-content: center; align-items: center; padding: 15px 20px; background-color: #ffffff; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.06); border-bottom: none; z-index: 10; }
+        .header-title { font-size: 16px; font-weight: 700; color: #000; }
+
+        /* CONTENIDO PRINCIPAL */
+        .content { flex: 1; overflow-y: auto; padding-bottom: 120px; /* Incrementado para que el botón enviar no se esconda */ display: flex; flex-direction: column; align-items: center; }
+        .content::-webkit-scrollbar { width: 0px; background: transparent; }
+
+        /* SECCIÓN SUPERIOR DE ÉXITO */
+        .success-header { display: flex; flex-direction: column; align-items: center; margin-top: 25px; margin-bottom: 20px; }
+        
+        /* Icono Check Verde */
+        .check-icon-container { width: 50px; height: 50px; background-color: #2bd071; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-bottom: 15px; }
+        .check-icon-container svg { width: 30px; height: 30px; stroke: white; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+        
+        .success-text { font-size: 16px; color: #000; font-weight: 500; margin-bottom: 5px; }
+        
+        /* Monto Verde */
+        .amount-display { color: #00b551; display: flex; align-items: baseline; justify-content: center; margin-bottom: 5px; }
+        .amount-currency { font-size: 22px; font-weight: 600; margin-right: 4px; }
+        .amount-value { font-size: 24px; font-weight: 700; line-height: 1; }
+
+        .gratis-text { font-size: 14px; font-weight: 700; color: #000; }
+
+        /* TICKET CON BORDES ONDULADOS (SCALLOPED) - Color #F3F5F4 */
+        .ticket {
+            position: relative;
+            background-color: #F3F5F4;
+            width: 85%;
+            padding: 25px 20px;
+            margin-bottom: 30px;
+        }
+        .ticket::before {
+            content: ""; position: absolute; top: -10px; left: 0; right: 0; height: 10px;
+            background-size: 20px 20px;
+            background-image: radial-gradient(circle at 10px 10px, #F3F5F4 10px, transparent 11px);
+        }
+        .ticket::after {
+            content: ""; position: absolute; bottom: -10px; left: 0; right: 0; height: 10px;
+            background-size: 20px 20px;
+            background-image: radial-gradient(circle at 10px 0, #F3F5F4 10px, transparent 11px);
+        }
+
+        /* DATOS DEL TICKET */
+        .ticket-row { margin-bottom: 15px; display: flex; flex-direction: column; gap: 2px; }
+        .ticket-row:last-child { margin-bottom: 0; }
+        
+        .ticket-label { font-size: 14.5px; font-weight: 700; color: #000; }
+        .ticket-value { font-size: 14.5px; font-weight: 400; color: #222; }
+        .ticket-value-sub { font-size: 14px; color: #555; }
+
+        /* BOTÓN ENVIAR CONSTANCIA */
+        .btn-enviar-text { background: none; border: none; color: #00b551; font-size: 16px; font-weight: 600; cursor: pointer; padding: 10px; margin-bottom: 20px; }
+
+        /* --- ESTILOS NOTIFICACIÓN --- */
+        .push-notification {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-150%);
+            width: 90%;
+            max-width: 400px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            z-index: 9999;
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s;
+            cursor: grab;
+        }
+
+        .push-notification.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .push-notification.hiding {
+            transform: translateX(-50%) translateY(-150%);
+            opacity: 0;
+        }
+
+        .push-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin-right: 15px;
+        }
+
+        .push-content {
+            flex: 1;
+        }
+
+        .push-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: #000;
+            margin-bottom: 2px;
+        }
+
+        .push-message {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .push-time {
+            font-size: 12px;
+            color: #888;
+            align-self: flex-start;
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="notiSound" src="noti.mp3" preload="auto"></audio>
+
+    <div class="mobile-wrapper" id="captureArea">
+
+        <div class="push-notification" id="pushNoti">
+            <img src="img/interbank_wrdgas.webp" alt="Interbank" class="push-icon">
+            <div class="push-content">
+                <div class="push-title">Interbank</div>
+                <div class="push-message" id="pushMessage">Nombre te ha transferido S/ 0.00</div>
+            </div>
+            <div class="push-time">Ahora</div>
+        </div>
+        
+        <header class="header" id="topHeader">
+            <div class="header-title">Constancia</div>
+        </header>
+
+        <div class="content">
+            
+            <div class="success-header">
+                <div class="check-icon-container">
+                    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                <div class="success-text">Transferiste</div>
+                <div class="amount-display">
+                    <span class="amount-currency" id="finalMoneda">S/</span>
+                    <span class="amount-value" id="finalMonto">0.00</span>
+                </div>
+                <div class="gratis-text">Gratis e inmediato</div>
+            </div>
+
+            <div class="ticket">
+                
+                <div class="ticket-row">
+                    <div class="ticket-label">Cuenta a Cargo:</div>
+                    <div class="ticket-value" id="finalCargoNombre">Nombre Cuenta</div>
+                    <div class="ticket-value-sub" id="finalCargoNum">*** *** ****</div>
+                </div>
+
+                <div class="ticket-row">
+                    <div class="ticket-label">Cuenta destino:</div>
+                    <div class="ticket-value" id="finalDestNombre">Nombre Destino</div>
+                    <div class="ticket-value-sub" id="finalDestNum">191 2058951088</div>
+                </div>
+
+                <div class="ticket-row">
+                    <div class="ticket-label">Destino:</div>
+                    <div class="ticket-value">Interbank</div>
+                </div>
+
+                <div class="ticket-row">
+                    <div class="ticket-label">Fecha y hora:</div>
+                    <div class="ticket-value" id="finalFechaHora">-- --- ---- &nbsp; --:-- --</div>
+                </div>
+
+                <div class="ticket-row">
+                    <div class="ticket-label">Código de operación:</div>
+                    <div class="ticket-value" id="finalCodigo">00000000</div>
+                </div>
+
+            </div>
+
+            <button class="btn-enviar-text" id="actionButton" onclick="enviarConstancia()">Enviar constancia</button>
+
+        </div>
+
+        <nav class="bottom-nav" id="bottomNav">
+            <button class="nav-item active" onclick="window.location.href='inicio.html'">
+                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <span>Inicio</span>
+            </button>
+            <button class="nav-item" onclick="window.location.href='trans.html'">
+                <img src="img/transferencias.jpg" alt="Operaciones" class="nav-icon-op">
+                <span>Operaciones</span>
+            </button>
+            <div class="qr-fab-container">
+                <div class="qr-fab">
+                    <img src="img/qr.png" alt="QR" style="width: 26px; height: 26px; object-fit: contain;">
+                </div>
+            </div>
+            <button class="nav-item">
+                <img src="img/beneficios.webp" alt="Beneficios" class="nav-icon-img">
+                <span>Beneficios</span>
+            </button>
+            <button class="nav-item">
+                <img src="img/para_ti.webp" alt="Para ti" class="nav-icon-img">
+                <span>Para ti</span>
+            </button>
+        </nav>
+
+    </div>
+
+    <script>
+        // --- 1. CARGAR DATOS DINÁMICOS ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Cuentas
+            const cargoNombre = localStorage.getItem('ibk_trans_cargo_name') || 'Cuenta Simple Soles';
+            
+            let cargoNumRaw = localStorage.getItem('ibk_trans_cargo_num') || '1912058951088';
+            let cargoNumMasked = cargoNumRaw;
+            if (cargoNumRaw.replace(/\s/g, '').length >= 12) {
+                let clean = cargoNumRaw.replace(/\s/g, '');
+                cargoNumMasked = `${clean.substring(0,4)} ${clean.substring(4,6)}** **** ${clean.substring(clean.length-4)}`;
+            }
+
+            const destNombre = localStorage.getItem('ibk_trans_dest_name') || 'Cuenta Destino';
+            const destNum = localStorage.getItem('ibk_trans_dest_num') || '191 2058951088';
+
+            // Monto 
+            let rawMonto = localStorage.getItem('ibk_trans_monto');
+            let montoFinal = '0.00';
+            
+            if (rawMonto) {
+                let cleanedMonto = rawMonto.replace(/[^\d.]/g, '');
+                if (cleanedMonto && !isNaN(cleanedMonto)) {
+                    montoFinal = parseFloat(cleanedMonto).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                }
+            }
+
+            const moneda = localStorage.getItem('ibk_trans_currency') || 'S/';
+
+            // Asignar a la UI
+            document.getElementById('finalCargoNombre').innerText = cargoNombre;
+            document.getElementById('finalCargoNum').innerText = cargoNumMasked;
+            document.getElementById('finalDestNombre').innerText = destNombre;
+            document.getElementById('finalDestNum').innerText = destNum;
+            document.getElementById('finalMoneda').innerText = moneda;
+            document.getElementById('finalMonto').innerText = montoFinal;
+
+            // Generar Código de Operación (8 dígitos)
+            const opCode = Math.floor(10000000 + Math.random() * 90000000);
+            document.getElementById('finalCodigo').innerText = `0${opCode}`.slice(-8);
+
+            // Generar Fecha y Hora Actual
+            const now = new Date();
+            const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+            const day = now.getDate().toString().padStart(2, '0');
+            const month = months[now.getMonth()];
+            const year = now.getFullYear();
+            
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            const timeStr = `${hours.toString().padStart(2, '0')}:${minutes} ${ampm}`;
+            
+            document.getElementById('finalFechaHora').innerHTML = `${day} ${month} ${year} &nbsp;&nbsp; ${timeStr}`;
+
+            // --- LÓGICA DE NOTIFICACIÓN PUSH ---
+            document.getElementById('pushMessage').innerText = `${destNombre} te ha transferido ${moneda} ${montoFinal}`;
+            
+            const notiSound = document.getElementById('notiSound');
+            const pushNoti = document.getElementById('pushNoti');
+            
+            // Retraso ligero para simular llegada de red
+            setTimeout(() => {
+                // Intentar reproducir sonido
+                notiSound.play().catch(e => console.log("Audio bloqueado por navegador", e));
+                
+                // Mostrar notificación
+                pushNoti.classList.add('show');
+
+                // Ocultar automáticamente a los 4 segundos
+                setTimeout(() => {
+                    if(pushNoti.classList.contains('show')){
+                        cerrarNotificacion();
+                    }
+                }, 4000);
+
+            }, 500);
+
+            // Lógica para deslizar la notificación
+            let startY = 0;
+            let startX = 0;
+
+            pushNoti.addEventListener('touchstart', e => {
+                startY = e.touches[0].clientY;
+                startX = e.touches[0].clientX;
+            }, {passive: true});
+
+            pushNoti.addEventListener('touchmove', e => {
+                let currentY = e.touches[0].clientY;
+                let currentX = e.touches[0].clientX;
+                
+                // Si desliza hacia arriba o hacia la izquierda
+                if (startY - currentY > 20 || startX - currentX > 30) {
+                    cerrarNotificacion();
+                }
+            }, {passive: true});
+        });
+
+        function cerrarNotificacion() {
+            const pushNoti = document.getElementById('pushNoti');
+            pushNoti.classList.remove('show');
+            pushNoti.classList.add('hiding');
+        }
+
+        // --- 2. LÓGICA PARA COMPARTIR CONSTANCIA ---
+        function enviarConstancia() {
+            const captureArea = document.getElementById('captureArea');
+            const actionButton = document.getElementById('actionButton');
+            const bottomNav = document.getElementById('bottomNav');
+            const pushNoti = document.getElementById('pushNoti');
+            
+            // Ocultar elementos no deseados en la foto
+            actionButton.style.display = 'none';
+            bottomNav.style.display = 'none';
+            pushNoti.style.display = 'none'; // Ocultar noti si justo está tomando foto
+
+            setTimeout(() => {
+                html2canvas(captureArea, {
+                    scale: 2, 
+                    backgroundColor: '#ffffff' 
+                }).then(canvas => {
+                    canvas.toBlob(blob => {
+                        let nombreParaArchivo = document.getElementById('finalDestNombre').innerText.replace(/[^a-zA-Z0-9]/g, "_");
+                        const file = new File([blob], `Constancia_Transf_${nombreParaArchivo}.png`, { type: 'image/png' });
+                        
+                        if (navigator.share) {
+                            navigator.share({
+                                title: `Transferencia a ${nombreParaArchivo}`,
+                                files: [file]
+                            }).then(() => {
+                                restaurarUI(actionButton, bottomNav);
+                            }).catch(err => {
+                                console.log('Error al compartir:', err);
+                                restaurarUI(actionButton, bottomNav);
+                            });
+                        } else {
+                            const link = document.createElement('a');
+                            link.download = `Constancia_Transf_${nombreParaArchivo}.png`;
+                            link.href = canvas.toDataURL('image/png');
+                            link.click();
+                            restaurarUI(actionButton, bottomNav);
+                        }
+                    });
+                });
+            }, 150); 
+        }
+
+        function restaurarUI(actionButton, bottomNav) {
+            actionButton.style.display = 'block';
+            bottomNav.style.display = 'flex';
+        }
+    </script>
+</body>
+</html>

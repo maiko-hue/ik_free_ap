@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="manifest" href="manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Acerca de - Interbank</title>
+    <link rel="icon" href="img/favicon.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
+
+    <style>
+        * {
+    /* Elimina el recuadro azul al hacer clic en celulares */
+    -webkit-tap-highlight-color: transparent;
+    outline: none !important;
+    
+    /* Bloquea la selección de texto en toda la app */
+    -webkit-user-select: none; 
+    -moz-user-select: none; 
+    -ms-user-select: none; 
+    user-select: none; 
+}
+
+/* Excepción para que sí se pueda seleccionar/escribir en los inputs */
+input, textarea {
+    -webkit-user-select: auto;
+    -moz-user-select: auto;
+    -ms-user-select: auto;
+    user-select: auto;
+}
+        /* HEADER */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background-color: #ffffff; flex-shrink: 0; border-bottom: 1px solid #f0f0f0; z-index: 100; }
+        .header .title { font-size: 18px; font-weight: 700; color: #000; flex-grow: 1; text-align: center; }
+        .header .right-space { width: 34px; } 
+        .back-btn { background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px; }
+        .back-btn svg { width: 24px; height: 24px; stroke: #00b551; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+
+        /* VISTA PRINCIPAL */
+        .view { flex: 1; overflow-y: auto; padding-top: 20px; padding-bottom: 30px; }
+        .view::-webkit-scrollbar { width: 0px; background: transparent; }
+        
+        .menu-list { padding: 0 20px; display: flex; flex-direction: column; gap: 12px; }
+        
+        .menu-item { background-color: #ffffff; border-radius: 12px; padding: 18px 20px; display: flex; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.03); border: 1px solid #f0f0f0; cursor: pointer; text-decoration: none; transition: background-color 0.2s; }
+        .menu-item:active { background-color: #f5f7f9; }
+        
+        .menu-icon { width: 24px; height: 24px; margin-right: 15px; stroke: #00b551; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+        .menu-icon-blue { stroke: #0039a6; } /* Variante azul para Telegram */
+        
+        .menu-text { flex: 1; font-size: 16px; color: #000; font-weight: 600; }
+        .menu-arrow { color: #00b551; font-size: 20px; font-weight: bold; }
+
+        .section-title { font-size: 13px; font-weight: 800; color: #888; text-transform: uppercase; margin: 25px 20px 10px; letter-spacing: 0.5px; }
+        .section-title:first-child { margin-top: 0; }
+
+        /* MODALES NATIVOS */
+        .modal-overlay { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background-color: rgba(0,0,0,0.6); z-index: 1000; 
+            display: none; justify-content: center; align-items: center; 
+            padding: 30px; backdrop-filter: blur(2px);
+        }
+        .modal-card { 
+            background-color: #ffffff; border-radius: 16px; padding: 25px; 
+            width: 100%; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+        .modal-title { color: #0039a6; font-size: 18px; font-weight: 800; margin-bottom: 15px; }
+        .modal-text { color: #555; font-size: 15px; margin-bottom: 25px; line-height: 1.6; }
+        .modal-text strong { color: #333; }
+        
+        .btn-m { width: 100%; padding: 14px; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; border: none; background-color: #00b551; color: white; transition: background 0.2s; }
+        .btn-m:active { background-color: #009e47; }
+        
+        /* Loader de actualización */
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #00b551; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 0 auto 15px; display: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body>
+
+    <div class="mobile-wrapper">
+
+        <div class="modal-overlay" id="modalCreditos">
+            <div class="modal-card">
+                <div class="modal-title">Créditos</div>
+                <div class="modal-text">
+                    <strong>Versión Premium:</strong> 1.0<br>
+                    <strong>Última actualización:</strong> 27/02/26
+                </div>
+                <button class="btn-m" onclick="cerrarModal('modalCreditos')">Aceptar</button>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="modalActualizando">
+            <div class="modal-card">
+                <div class="loader" id="spinner" style="display: block;"></div>
+                <div class="modal-title" style="margin-bottom: 5px;">Actualizando...</div>
+                <div class="modal-text" style="margin-bottom: 0; font-size: 13px;">Obteniendo los últimos datos de la app.</div>
+            </div>
+        </div>
+
+        <header class="header">
+            <button class="back-btn" onclick="window.location.href='config.html'">
+                <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <div class="title">Información de App</div>
+            <div class="right-space"></div>
+        </header>
+
+        <div class="view">
+            
+            <div class="section-title">Sistema</div>
+            <div class="menu-list">
+                <div class="menu-item" onclick="forzarActualizacion()">
+                    <svg class="menu-icon" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-9.21l-3.23 3.06"></path></svg>
+                    <div class="menu-text">Forzar Actualización</div>
+                    <div class="menu-arrow">›</div>
+                </div>
+
+                <div class="menu-item" onclick="window.location.href='noti.html'">
+                    <svg class="menu-icon" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                    <div class="menu-text">Programar Notificación</div>
+                    <div class="menu-arrow">›</div>
+                </div>
+
+                <div class="menu-item" onclick="abrirModal('modalCreditos')">
+                    <svg class="menu-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    <div class="menu-text">Créditos de la App</div>
+                    <div class="menu-arrow">›</div>
+                </div>
+            </div>
+
+            <div class="section-title">Contacto Oficial</div>
+            <div class="menu-list">
+                <a href="https://t.me/MaikolEsleiter" class="menu-item" target="_blank">
+                    <svg class="menu-icon menu-icon-blue" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    <div class="menu-text">Contactar al Dueño</div>
+                    <div class="menu-arrow">›</div>
+                </a>
+
+                <a href="https://t.me/appsreborn" class="menu-item" target="_blank">
+                    <svg class="menu-icon menu-icon-blue" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    <div class="menu-text">Grupo Oficial</div>
+                    <div class="menu-arrow">›</div>
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Funciones para Modales
+        function abrirModal(id) {
+            document.getElementById(id).style.display = 'flex';
+        }
+        function cerrarModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        // Lógica Fuerte: Forzar Actualización PWA
+        function forzarActualizacion() {
+            // Muestra el modal de carga visual
+            abrirModal('modalActualizando');
+
+            // 1. Matar los Service Workers (El motor que guarda el caché)
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for (let registration of registrations) {
+                        registration.unregister();
+                    }
+                });
+            }
+
+            // 2. Vaciar toda la memoria Caché almacenada
+            if ('caches' in window) {
+                caches.keys().then(function(names) {
+                    for (let name of names) {
+                        caches.delete(name);
+                    }
+                });
+            }
+
+            // 3. Esperar 1.5 segundos para dar tiempo a borrar y que el usuario vea el loader, luego recargar forzado
+            setTimeout(() => {
+                window.location.reload(true);
+            }, 1500);
+        }
+    </script>
+</body>
+</html>

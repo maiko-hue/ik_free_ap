@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="manifest" href="manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mi Cuenta - Banca Móvil</title>
+    <link rel="icon" href="img/favicon.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
+
+    <style>
+        * {
+    /* Elimina el recuadro azul al hacer clic en celulares */
+    -webkit-tap-highlight-color: transparent;
+    outline: none !important;
+    
+    /* Bloquea la selección de texto en toda la app */
+    -webkit-user-select: none; 
+    -moz-user-select: none; 
+    -ms-user-select: none; 
+    user-select: none; 
+}
+
+/* Excepción para que sí se pueda seleccionar/escribir en los inputs */
+input, textarea {
+    -webkit-user-select: auto;
+    -moz-user-select: auto;
+    -ms-user-select: auto;
+    user-select: auto;
+}
+        /* HEADER */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background-color: #ffffff; flex-shrink: 0; z-index: 10; border-bottom: 1px solid #f0f0f0; }
+        .back-btn { background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px; width: 30px; }
+        .back-btn svg { width: 22px; height: 22px; stroke: #00b551; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+        .header-title { font-size: 16px; font-weight: 800; color: #000; text-align: center; flex-grow: 1; margin-left: 15px; }
+        
+        .header-actions { display: flex; gap: 15px; align-items: center; }
+        .icon-for-you { width: 24px; height: 24px; object-fit: cover; border-radius: 50%; }
+        .header-actions svg { width: 22px; height: 22px; fill: none; stroke: #00b551; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+        /* SCROLL VIEW */
+        .scroll-content { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+        .scroll-content::-webkit-scrollbar { width: 0px; background: transparent; }
+
+        /* --- SECCIÓN SUPERIOR (Fondo Verde Claro) --- */
+        /* Sobrescribimos el fondo solo para esta sección interior para que combine con el diseño anterior */
+        .top-section { padding-bottom: 30px; background-color: #EAF7F3; } 
+
+        /* SELECTOR DE CUENTA */
+        .account-card-top { background-color: #ffffff; border-radius: 8px; margin: 15px 20px; padding: 12px 15px; display: flex; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .acc-icon { width: 45px; height: 35px; object-fit: cover; border-radius: 6px; margin-right: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .acc-details { flex: 1; }
+        .acc-name { font-size: 14px; font-weight: 700; color: #000; line-height: 1.2; }
+        .acc-number { font-size: 12px; color: #666; margin-top: 2px; }
+        .acc-actions { display: flex; align-items: center; gap: 10px; }
+        .acc-actions svg { width: 18px; height: 18px; stroke: #00b551; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+        /* SALDOS */
+        .balances-container { display: flex; justify-content: space-between; padding: 15px 25px; position: relative; margin-bottom: 10px; }
+        
+        .balance-block { display: flex; flex-direction: column; position: relative; }
+        .balance-block.right { align-items: flex-end; }
+        
+        .bal-amount { font-size: 20px; font-weight: 700; color: #0039a6; letter-spacing: -0.5px; }
+        .bal-label { font-size: 11px; color: #555; margin-top: 2px; }
+        
+        /* ICONOS AGRANDADOS (Circulos Verdes) */
+        .bal-icon { width: 42px; height: 42px; object-fit: contain; margin-top: 10px; }
+
+        /* SLIDER CENTRAL */
+        .transfer-slider { position: absolute; left: 50%; top: 67px; transform: translateX(-50%); width: 215px; height: 42px; background-color: #0039a6; border-radius: 25px; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; color: rgba(255,255,255,0.8); font-size: 15px; font-weight: 700; letter-spacing: 2px; }
+        
+        /* FONDO BLANCO DEL SLIDER (NUEVO) */
+        .slider-white-bg { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 70px; height: 70px; background-color: #ffffff; border-radius: 50%; display: flex; justify-content: center; align-items: center; z-index: 1; }
+
+        /* AURA/DEGRADADO DEL SLIDER (Circulo Verde Modificado) */
+        .slider-thumb { width: 46px; height: 46px; background-color: #00b551; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: 800; font-size: 18px; z-index: 2; box-shadow: 0 0 15px 4px rgba(0, 181, 81, 0.4); }
+
+        /* ICONO ALCANCÍA AGRANDADO CON FONDO DEGRADADO */
+        .alcancia-icon-gradient { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(to bottom right, #85ACD3, #CAC9DA); margin-top: 10px; margin-right: 5px; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        .alcancia-icon-gradient img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; transform: scale(1.2); }
+
+        /* --- CATEGORÍAS MODIFICADAS: TAMAÑO Y ESPACIADO --- */
+        .categories-scroll { display: flex; justify-content: space-between; gap: 8px; padding: 10px 20px 10px; overflow-x: auto; }
+        .categories-scroll::-webkit-scrollbar { display: none; }
+        
+        .cat-item { display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1; min-width: 0; }
+        
+        /* MODIFICACIÓN: Base circular común */
+        .cat-circle { width: 68px; height: 68px; border-radius: 50%; border: 2.5px solid #00b551; display: flex; justify-content: center; align-items: center; background-color: #ffffff; margin-bottom: 8px; position: relative; overflow: hidden; }
+        
+        /* MODIFICACIÓN: Pseudoelemento común para el círculo de fondo sólido */
+        .cat-circle::before { content: ''; position: absolute; width: 50px; height: 50px; border-radius: 50%; z-index: 1; }
+
+        /* AURA/DEGRADADO DEL CERDITO CATEGORÍA (Circulo Amarillo) */
+        .pig-glow { box-shadow: 0 0 15px 3px rgba(0, 181, 81, 0.35); }
+
+        /* MODIFICACIÓN: Estilo específico para el fondo de la alcancía */
+        .pig-glow::before { background-color: #C6E3F7; }
+
+        /* MODIFICACIÓN: Imagen sobre el círculo de fondo */
+        .cat-circle img { width: 36px; height: 36px; object-fit: cover; border-radius: 50%; position: relative; z-index: 2; }
+
+        /* MODIFICACIÓN: Estilo específico para el fondo de agregar categoría */
+        .plus-bg::before { background-color: #E9FAF0; }
+
+        /* MODIFICACIÓN: SVG sobre el círculo de fondo */
+        .plus-bg svg { width: 34px; height: 34px; stroke: #00b551; stroke-width: 2.5; stroke-linecap: round; position: relative; z-index: 2; }
+        
+        .cat-text { font-size: 11.5px; line-height: 1.2; font-weight: 600; }
+        .text-blue { color: #001e60; }
+        .text-green { color: #00b551; }
+
+        /* SOMBRA SEPARADORA (Circulo Rojo) */
+        .shadow-divider { height: 14px; background: radial-gradient(ellipse at center, rgba(0,0,0,0.12) 0%, transparent 75%); margin-bottom: 0px; }
+
+        .btn-categorias { background-color: #00b551; color: white; border: none; display: flex; justify-content: center; align-items: center; height: 35px; width: calc(100% - 200px); margin: -10px auto 15px; padding: 0px 0px 0px 0px; border-top-left-radius: 0px; border-top-right-radius: 0px; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 10px rgba(0, 181, 81, 0.2); }
+
+        /* ACCIONES RÁPIDAS */
+        .quick-actions { display: flex; gap: 12px; padding: 10px 20px 0; align-items: flex-start; }
+        
+        .qa-container { flex: 1; display: flex; flex-direction: column; align-items: center; }
+        
+        .qa-card { width: 100%; background-color: #ffffff; border-radius: 10px; padding: 15px 0; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid #f0f0f0; margin-bottom: 8px; }
+        
+        .qa-icon { width: 28px; height: 28px; object-fit: contain; margin-bottom: 0px; }
+        
+        .qa-text { font-size: 11.5px; color: #000; text-align: center; line-height: 1.2; font-weight: 500; }
+
+        /* --- SECCIÓN INFERIOR (Movimientos) - MODIFICADO A FORMA DE TARJETA --- */
+        .movements-section { background-color: #ffffff; border-radius: 8px; margin: 15px 20px 30px 20px; flex: 1; display: flex; flex-direction: column; box-shadow: 0 2px 12px rgba(0,0,0,0.08); border: 1px solid #f0f0f0; position: relative; z-index: 5; padding-bottom: 20px; min-height: 350px;}
+        
+        .mov-tabs { display: flex; border-bottom: 1px solid #f0f0f0; }
+        .mov-tab { flex: 1; text-align: center; padding: 18px 0; font-size: 14px; font-weight: 700; color: #666; cursor: pointer; }
+        .mov-tab.active { color: #00b551; border-bottom: 2.5px solid #00b551; }
+
+        .empty-state { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px 20px; }
+        .empty-icon { width: 140px; height: 140px; object-fit: contain; margin-bottom: 20px; }
+        .empty-text { font-size: 15px; color: #000; font-weight: 700; text-align: center; }
+
+    </style>
+</head>
+<body>
+
+    <div class="mobile-wrapper">
+        
+        <header class="header">
+            <button class="back-btn" onclick="window.location.href='inicio.html'">
+                <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <div class="header-title">Mi Cuenta</div>
+            <div class="header-actions">
+                <img src="img/for_you.jpg" alt="Para ti" class="icon-for-you">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+            </div>
+        </header>
+
+        <div class="scroll-content">
+            
+            <div class="top-section">
+                
+                <div class="account-card-top">
+                    <img src="img/target.jpg" alt="Icono Cuenta" class="acc-icon">
+                    <div class="acc-details">
+                        <div class="acc-name" id="displayAccName">Cuenta Simple Soles</div>
+                        <div class="acc-number" id="displayAccNum">1912058951088</div>
+                    </div>
+                    <div class="acc-actions">
+                        <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                        <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
+                </div>
+
+                <div class="balances-container">
+                    
+                    <div class="balance-block">
+                        <div class="bal-amount" id="displayAccBal">S/ 0.00</div>
+                        <div class="bal-label">Saldo disponible</div>
+                        <img src="img/cards.png" alt="Cards" class="bal-icon" style="margin-left: 5px;">
+                    </div>
+
+                    <div class="transfer-slider">
+                        <span>&lt; &lt; &lt;</span>
+                        <div class="slider-white-bg">
+                            <div class="slider-thumb" id="sliderCurrency">S/</div>
+                        </div>
+                        <span>&gt; &gt; &gt;</span>
+                    </div>
+
+                    <div class="balance-block right">
+                        <div class="bal-amount" id="displayPigBal">S/ 0.00</div>
+                        <div class="bal-label">Mi alcancía</div>
+                        <div class="alcancia-icon-gradient">
+                            <img src="img/pig-bg.png" alt="Pig">
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="categories-scroll">
+                    <div class="cat-item">
+                        <div class="cat-circle pig-glow" style="border-color: #50d28b;">
+                            <img src="img/pig-bg.png" alt="Pig">
+                        </div>
+                        <div class="cat-text text-blue" id="catPigBal">S/ 0<br>Mi alcancía</div>
+                    </div>
+                    <div class="cat-item">
+                        <div class="cat-circle plus-bg" style="border-color: #50d28b;">
+                            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        </div>
+                        <div class="cat-text text-green">Agregar<br>categoría</div>
+                    </div>
+                    <div class="cat-item">
+                        <div class="cat-circle plus-bg" style="border-color: #50d28b;">
+                            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        </div>
+                        <div class="cat-text text-green">Agregar<br>categoría</div>
+                    </div>
+                    <div class="cat-item">
+                        <div class="cat-circle plus-bg" style="border-color: #50d28b;">
+                            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        </div>
+                        <div class="cat-text text-green">Agregar<br>categoría</div>
+                    </div>
+                </div>
+
+                <div class="shadow-divider"></div>
+
+                <button class="btn-categorias">Revisar mis categorías</button>
+
+                <div class="quick-actions">
+                    <div class="qa-container">
+                        <div class="qa-card">
+                            <img src="img/datos.webp" alt="Datos" class="qa-icon">
+                        </div>
+                        <div class="qa-text">Ver datos</div>
+                    </div>
+                    
+                    <div class="qa-container">
+                        <div class="qa-card">
+                            <img src="img/condiciones.webp" alt="Condiciones" class="qa-icon">
+                        </div>
+                        <div class="qa-text">Condiciones<br>de mi cuenta</div>
+                    </div>
+                    
+                    <div class="qa-container">
+                        <div class="qa-card">
+                            <img src="img/google.webp" alt="Google Play" class="qa-icon">
+                        </div>
+                        <div class="qa-text">Google Play</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="movements-section">
+                <div class="mov-tabs">
+                    <div class="mov-tab active">Movimientos</div>
+                    <div class="mov-tab">Movimientos alcancía</div>
+                </div>
+                
+                <div class="empty-state">
+                    <img src="img/box-movements.webp" alt="Sin movimientos" class="empty-icon">
+                    <div class="empty-text">No tienes ningún movimiento<br>registrado</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const DEFAULTS = {
+            acc1: { name: "Cuenta Simple Soles", curr: "S/", bal: "1000.00", num: "1912058951088" },
+            acc2: { name: "Cuenta Simple Dolares", curr: "US$", bal: "1000.00", num: "1912058956625" },
+            acc3: { name: "Cuenta de Ahorros", curr: "S/", bal: "1000.00", num: "1911111111111" }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // 1. Obtener ID de la URL (ej: mi_cuenta.html?id=2). Si no hay, por defecto es la 1.
+            const urlParams = new URLSearchParams(window.location.search);
+            let accountId = urlParams.get('id') || '1';
+            
+            // 2. Definir la base de datos a usar (si pones un id que no existe, regresa al acc1)
+            let accKey = `acc${accountId}`;
+            let defaultData = DEFAULTS[accKey] ? DEFAULTS[accKey] : DEFAULTS.acc1;
+
+            // 3. Extraer datos de la memoria para esa cuenta específica o usar default
+            let name = localStorage.getItem(`ibk_acc${accountId}_name`) || defaultData.name;
+            let curr = localStorage.getItem(`ibk_acc${accountId}_curr`) || defaultData.curr;
+            let bal = localStorage.getItem(`ibk_acc${accountId}_bal`) || defaultData.bal;
+            let num = localStorage.getItem(`ibk_acc${accountId}_num`) || defaultData.num;
+
+            // 4. Formatear y pintar en la UI
+            let formattedBal = parseFloat(bal).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+            document.getElementById('displayAccName').innerText = name;
+            document.getElementById('displayAccNum').innerText = num.replace(/\s/g, ''); // Sin espacios
+
+            document.getElementById('displayAccBal').innerText = `${curr} ${formattedBal}`;
+            document.getElementById('sliderCurrency').innerText = curr;
+
+            // La alcancía siempre empieza en 0.00 de la moneda actual
+            document.getElementById('displayPigBal').innerText = `${curr} 0.00`;
+            document.getElementById('catPigBal').innerHTML = `${curr} 0<br>Mi alcancía`;
+        });
+    </script>
+</body>
+</html>

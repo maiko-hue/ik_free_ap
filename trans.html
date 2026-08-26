@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="manifest" href="manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Transferencias - Banca Móvil</title>
+    <link rel="icon" href="img/favicon.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
+
+    <style>
+        * {
+    /* Elimina el recuadro azul al hacer clic en celulares */
+    -webkit-tap-highlight-color: transparent;
+    outline: none !important;
+    
+    /* Bloquea la selección de texto en toda la app */
+    -webkit-user-select: none; 
+    -moz-user-select: none; 
+    -ms-user-select: none; 
+    user-select: none; 
+}
+
+/* Excepción para que sí se pueda seleccionar/escribir en los inputs */
+input, textarea {
+    -webkit-user-select: auto;
+    -moz-user-select: auto;
+    -ms-user-select: auto;
+    user-select: auto;
+}
+        /* HEADER - Sombra aumentada */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background-color: #ffffff; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.06); z-index: 10; }
+        .back-btn { background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px; width: 30px; }
+        .back-btn svg { width: 20px; height: 20px; stroke: #00b551; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+        .header-title { font-size: 18px; font-weight: 700; color: #000; text-align: center; flex-grow: 1; }
+        .header-spacer { width: 30px; }
+
+        /* SISTEMA DE VISTAS */
+        .view { display: none; flex-direction: column; height: 100%; overflow-y: auto; }
+        .view.active { display: flex; }
+        .view::-webkit-scrollbar { width: 0px; background: transparent; }
+
+        /* --- VISTA 1: MENÚ OPCIONES --- */
+        .menu-wrapper { padding: 20px; background-color: #fafbfc; flex: 1; }
+        .op-card { background-color: #ffffff; border-radius: 8px; padding: 18px 15px; margin-bottom: 12px; display: flex; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.04); border: 1px solid #f0f0f0; cursor: pointer; }
+        .op-card:active { background-color: #f9f9f9; }
+        .op-icon { width: 26px; height: 26px; margin-right: 15px; object-fit: contain; }
+        .op-text { flex: 1; font-size: 15px; font-weight: 600; color: #000; }
+        .arrow-right { color: #00b551; font-size: 24px; font-weight: 800; transform: scaleY(1.2); }
+
+        /* --- VISTA 2 y 3: FORMULARIOS --- */
+        .form-wrapper { padding: 20px; flex: 1; background-color: #ffffff; display: flex; flex-direction: column; }
+        
+        .section-label { font-size: 14px; color: #000; font-weight: 600; margin-bottom: 10px; display: block; }
+        
+        /* Toggle Moneda */
+        .currency-toggle { display: flex; border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden; margin-bottom: 25px; }
+        .toggle-btn { flex: 1; padding: 12px; font-size: 14px; font-weight: 600; color: #888; background-color: #f9f9f9; border: none; cursor: pointer; transition: 0.2s; }
+        .toggle-btn.active { background-color: #04BE4F; color: white; }
+
+        /* Input Monto */
+        .amount-container { display: flex; align-items: center; border-bottom: 1px solid #e0e0e0; padding-bottom: 5px; margin-bottom: 25px; transition: border-color 0.3s; }
+        .amount-container:focus-within { border-bottom-color: #00b551; }
+        .amount-symbol { font-size: 26px; font-weight: 500; color: #333; margin-right: 8px; }
+        .amount-input { border: none; background: transparent; font-size: 26px; font-weight: 500; color: #333; width: 100%; outline: none; }
+        .amount-input::placeholder { color: #ccc; }
+
+        /* Select Box Cuenta */
+        .select-box { border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; cursor: pointer; transition: 0.2s; background-color: #ffffff; }
+        .select-box.active { border-color: #00b551; background-color: #fafffb; }
+        .select-info { display: flex; flex-direction: column; }
+        .select-title { font-size: 15px; color: #000; font-weight: 600; }
+        .select-sub { font-size: 13px; color: #666; margin-top: 3px; display: none; }
+        .select-action { color: #00b551; font-weight: 600; font-size: 14px; }
+        
+        /* Centrado */
+        .exchange-rate { font-size: 12px; color: #000; margin-bottom: 30px; text-align: center; }
+        .exchange-rate strong { font-weight: 700; }
+
+        /* Tarjetas de Cuenta Destino (NUEVO) */
+        .dest-account-card { background-color: #ffffff; border-radius: 10px; padding: 15px; margin-bottom: 15px; display: flex; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid #f0f0f0; cursor: pointer; transition: background-color 0.2s; }
+        .dest-account-card:active { background-color: #f9f9f9; }
+        .dest-acc-icon { width: 55px; height: 40px; object-fit: cover; border-radius: 6px; margin-right: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .dest-acc-details { flex: 1; }
+        .dest-acc-name { font-size: 14px; font-weight: 400; color: #000; margin-bottom: 2px; }
+        .dest-acc-balance { font-size: 16px; font-weight: 700; color: #000; }
+
+        /* Ajuste del botón para que no se pegue al fondo en la confirmación */
+        .btn-siguiente { background-color: #f0f0f0; color: #a0a0a0; border: none; width: 100%; padding: 16px; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: default; transition: 0.3s; margin-top: 30px; margin-bottom: 20px;}
+        .btn-siguiente.active { background-color: #04BE4F; color: white; cursor: pointer; }
+        .btn-siguiente.active:active { background-color: #03a042; }
+
+        /* --- VISTA 4: CONFIRMACIÓN (AJUSTADA) --- */
+        .conf-content { flex: 1; padding: 20px; display: flex; flex-direction: column; }
+        .conf-header { text-align: center; margin: 15px 0 25px; } 
+        .conf-header-main { font-size: 22px; color: #000; font-weight: 400; line-height: 1.3; }
+        .conf-header-main strong { font-weight: 800; }
+        
+        .conf-subtitle { font-size: 16px; color: #000; font-weight: 500; margin-bottom: 20px; } 
+        
+        /* Filas más juntas y con línea en todas */
+        .conf-row { margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 12px; }
+        
+        .conf-label { font-size: 12px; color: #888; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px; }
+        .conf-val { font-size: 15px; color: #000; font-weight: 400; line-height: 1.2; }
+        
+        .badge-gratis { background-color: #00b551; color: white; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 700; display: inline-block; margin-top: 2px; }
+        
+        .text-group { display: flex; flex-direction: column; gap: 2px; }
+
+        /* --- MODAL BOTTOM SHEET (CUENTAS) --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: flex-end; justify-content: center; }
+        .modal-overlay.active { display: flex; }
+        .bottom-sheet { background: white; width: 100%; max-width: 480px; border-top-left-radius: 20px; border-top-right-radius: 20px; padding: 25px 20px; animation: slideUp 0.3s ease-out; max-height: 80vh; display: flex; flex-direction: column; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        
+        .bs-title { font-size: 15px; font-weight: 600; color: #000; margin-bottom: 20px; text-align: center; }
+        .acc-list { overflow-y: auto; margin-bottom: 20px; flex: 1; }
+        .acc-list::-webkit-scrollbar { width: 0px; background: transparent; }
+        
+        .modal-card { border: 1px solid #f0f0f0; border-radius: 8px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
+        .modal-card.active { border-color: #00b551; background-color: #fafffb; }
+        .modal-acc-name { font-size: 14.5px; font-weight: 600; color: #000; margin-bottom: 4px; }
+        .modal-acc-bal { font-size: 13px; color: #888; }
+        
+        .radio-btn { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #ccc; display: flex; justify-content: center; align-items: center; }
+        .modal-card.active .radio-btn { border-color: #00b551; }
+        .radio-dot { width: 10px; height: 10px; border-radius: 50%; background-color: #00b551; display: none; }
+        .modal-card.active .radio-dot { display: block; }
+        
+        .btn-green-full { background-color: #04BE4F; color: white; border: none; width: 100%; padding: 16px; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; }
+        .btn-green-full:active { background-color: #03a042; }
+
+        /* --- PANTALLA DE CARGA (ANIMACIÓN) --- */
+        #loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(255, 255, 255, 0.95); z-index: 9999;
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+        }
+        .spinner-container { position: relative; width: 80px; height: 80px; display: flex; justify-content: center; align-items: center; }
+        .spinner-ring { position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 4px solid #f0f0f0; }
+        .spinner-spin { position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 4px solid transparent; border-top-color: #00b551; animation: spin 1s linear infinite; }
+        .spinner-icon { width: 35px; height: 35px; object-fit: contain; z-index: 2; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body>
+
+    <div id="loading-overlay">
+        <div class="spinner-container">
+            <div class="spinner-ring"></div>
+            <div class="spinner-spin"></div>
+            <img src="img/icon.webp" alt="Cargando" class="spinner-icon">
+        </div>
+    </div>
+
+    <div class="mobile-wrapper">
+        
+        <header class="header">
+            <button class="back-btn" onclick="goBack()">
+                <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <div class="header-title">Transferencias</div>
+            <div class="header-spacer"></div>
+        </header>
+
+        <div id="view-menu" class="view active">
+            <div class="menu-wrapper">
+                <div class="op-card" onclick="abrirFormularioMonto()">
+                    <img src="img/transferencias.jpg" alt="Entre mis cuentas" class="op-icon">
+                    <div class="op-text">Entre mis cuentas</div>
+                    <div class="arrow-right">›</div>
+                </div>
+                
+                <div class="op-card" onclick="window.location.href='cotras.html'">
+                    <img src="img/transferencias.jpg" alt="A otras cuentas" class="op-icon">
+                    <div class="op-text">A otras cuentas</div>
+                    <div class="arrow-right">›</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-form-monto" class="view">
+            <div class="form-wrapper">
+                
+                <span class="section-label">Elige la moneda</span>
+                <div class="currency-toggle">
+                    <button class="toggle-btn active" id="btnSoles" onclick="cambiarMoneda('Soles')">Soles</button>
+                    <button class="toggle-btn" id="btnDolares" onclick="cambiarMoneda('Dolares')">Dólares</button>
+                </div>
+
+                <span class="section-label">Ingresa el monto a transferir</span>
+                <div class="amount-container">
+                    <span class="amount-symbol" id="currencySymbol">S/</span>
+                    <input type="number" id="montoInput" class="amount-input" placeholder="0.00" step="0.01">
+                </div>
+
+                <span class="section-label" style="font-size: 13px; color: #666; font-weight: 500;">Transfiere desde</span>
+                <div class="select-box" id="boxCuenta" onclick="abrirModal()">
+                    <div class="select-info">
+                        <div class="select-title" id="boxTitle">Elige la cuenta</div>
+                        <div class="select-sub" id="boxSub">Saldo: S/ 0.00</div>
+                    </div>
+                    <div class="select-action" id="boxAction">Seleccionar</div>
+                </div>
+
+                <div class="exchange-rate">
+                    Tipo de cambio ref. Compra: <strong>3.468</strong> Venta: <strong>3.603</strong>
+                </div>
+
+                <button class="btn-siguiente" id="btnSiguienteMonto" onclick="irFormularioDestino()">Siguiente</button>
+
+            </div>
+        </div>
+
+        <div id="view-form-destino" class="view">
+            <div class="form-wrapper" style="padding-top: 25px; background-color: #fafbfc;">
+                
+                <span class="section-label" style="font-size: 15px; margin-bottom: 20px;">Elige la cuenta de destino</span>
+
+                <div id="destAccountsList">
+                    </div>
+
+            </div>
+        </div>
+
+        <div id="view-confirmacion" class="view">
+            <div class="conf-content">
+                
+                <div class="conf-header">
+                    <div class="conf-header-main">Estas a un paso de<br><strong>realizar tu transferencia</strong></div>
+                </div>
+
+                <div class="conf-subtitle">Confirma la información</div>
+
+                <div class="conf-row">
+                    <div class="conf-label">CUENTA A CARGO</div>
+                    <div class="conf-val text-group">
+                        <span id="confCargoNombre">Cuenta Simple Soles</span>
+                        <span id="confCargoNum" style="color: #666; font-size: 14px;">191 2058951088</span>
+                    </div>
+                </div>
+
+                <div class="conf-row">
+                    <div class="conf-label">CUENTA DESTINO</div>
+                    <div class="conf-val text-group">
+                        <span id="confDestNombre">Cuenta Simple Dolares</span>
+                        <span id="confDestNum" style="color: #666; font-size: 14px;">191 2058956625</span>
+                    </div>
+                </div>
+
+                <div class="conf-row">
+                    <div class="conf-label">MONEDA Y MONTO</div>
+                    <div class="conf-val" id="confMontoFinal">S/ 0.00</div>
+                </div>
+
+                <div class="conf-row" style="border-bottom: none;">
+                    <div class="conf-label">COMISIÓN</div>
+                    <div class="badge-gratis">GRATIS</div>
+                </div>
+
+                <button class="btn-siguiente active" onclick="procesarTransferencia()">Confirmar</button>
+
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="modalCuentas">
+            <div class="bottom-sheet">
+                <div class="bs-title">Seleccione la cuenta de cargo</div>
+                
+                <div class="acc-list" id="modalAccountsList">
+                    </div>
+
+                <button class="btn-green-full" onclick="confirmarCuenta()">Aceptar</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module" src="seguridad.js"></script>
+
+    <script>
+        const DEFAULTS = {
+            acc1: { name: "Cuenta Simple Soles", curr: "S/", bal: "1000.00" },
+            acc2: { name: "Cuenta Simple Dolares", curr: "US$", bal: "1000.00" },
+            acc3: { name: "Cuenta de Ahorros", curr: "S/", bal: "1000.00" }
+        };
+
+        // Variables de estado
+        let cuentaSeleccionadaTemporal = null; 
+        let cuentaSeleccionadaFinal = null; 
+        let cuentaDestinoId = null; // NUEVA VARIABLE PARA SABER A QUIÉN SUMARLE EL DINERO
+        let currentCurrency = 'S/';
+        
+        // --- NAVEGACIÓN MULTI-PASO ---
+        function goBack() {
+            const viewMenu = document.getElementById('view-menu');
+            const viewFormMonto = document.getElementById('view-form-monto');
+            const viewFormDestino = document.getElementById('view-form-destino');
+            const viewConfirmacion = document.getElementById('view-confirmacion');
+
+            if (viewConfirmacion.classList.contains('active')) {
+                viewConfirmacion.classList.remove('active');
+                viewFormDestino.classList.add('active');
+            } else if (viewFormDestino.classList.contains('active')) {
+                viewFormDestino.classList.remove('active');
+                viewFormMonto.classList.add('active');
+            } else if (viewFormMonto.classList.contains('active')) {
+                viewFormMonto.classList.remove('active');
+                viewMenu.classList.add('active');
+            } else {
+                window.location.href = 'inicio.html';
+            }
+        }
+
+        function cambiarVistaActiva(idOcultar, idMostrar) {
+            document.getElementById(idOcultar).classList.remove('active');
+            document.getElementById(idMostrar).classList.add('active');
+        }
+
+        function abrirFormularioMonto() {
+            cambiarVistaActiva('view-menu', 'view-form-monto');
+        }
+
+        // --- LÓGICA DE MONEDA ---
+        function cambiarMoneda(moneda) {
+            const btnSoles = document.getElementById('btnSoles');
+            const btnDolares = document.getElementById('btnDolares');
+            const symbol = document.getElementById('currencySymbol');
+
+            if (moneda === 'Soles') {
+                btnSoles.classList.add('active');
+                btnDolares.classList.remove('active');
+                symbol.innerText = 'S/';
+                currentCurrency = 'S/';
+            } else {
+                btnSoles.classList.remove('active');
+                btnDolares.classList.add('active');
+                symbol.innerText = 'US$';
+                currentCurrency = 'US$';
+            }
+        }
+
+        // --- VALIDACIONES DE BOTONES ---
+        const montoInput = document.getElementById('montoInput');
+        const btnSiguienteMonto = document.getElementById('btnSiguienteMonto');
+
+        montoInput.addEventListener('input', validarSiguienteMonto);
+        montoInput.addEventListener('blur', function() {
+            if (this.value && !isNaN(this.value) && this.value > 0) {
+                this.value = parseFloat(this.value).toFixed(2);
+            }
+        });
+
+        function validarSiguienteMonto() {
+            let monto = parseFloat(montoInput.value) || 0;
+            if (monto > 0 && cuentaSeleccionadaFinal !== null) {
+                btnSiguienteMonto.classList.add('active');
+            } else {
+                btnSiguienteMonto.classList.remove('active');
+            }
+        }
+
+        // --- LÓGICA DEL MODAL CUENTAS DE CARGO ---
+        function abrirModal() {
+            cargarCuentasEnModal();
+            document.getElementById('modalCuentas').classList.add('active');
+        }
+
+        function cargarCuentasEnModal() {
+            const listContainer = document.getElementById('modalAccountsList');
+            listContainer.innerHTML = ''; 
+
+            for (let i = 1; i <= 3; i++) {
+                let savedName = localStorage.getItem(`ibk_acc${i}_name`) || DEFAULTS[i-1].name;
+                let savedCurr = localStorage.getItem(`ibk_acc${i}_curr`) || DEFAULTS[i-1].curr;
+                let savedBal = localStorage.getItem(`ibk_acc${i}_bal`) || DEFAULTS[i-1].bal;
+                let formattedBal = parseFloat(savedBal).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+                let isSelected = (cuentaSeleccionadaTemporal === i) ? 'active' : '';
+                let dotDisplay = (cuentaSeleccionadaTemporal === i) ? 'style="display:block;"' : '';
+
+                let cardHTML = `
+                    <div class="modal-card ${isSelected}" onclick="elegirCuentaTemporal(${i}, '${savedName}', '${savedCurr}', '${formattedBal}')">
+                        <div>
+                            <div class="modal-acc-name">${savedName}</div>
+                            <div class="modal-acc-bal">Saldo: ${savedCurr} ${formattedBal}</div>
+                        </div>
+                        <div class="radio-btn"><div class="radio-dot" ${dotDisplay}></div></div>
+                    </div>
+                `;
+                listContainer.insertAdjacentHTML('beforeend', cardHTML);
+            }
+        }
+
+        function elegirCuentaTemporal(id, name, curr, bal) {
+            cuentaSeleccionadaTemporal = id;
+            const modal = document.getElementById('modalCuentas');
+            modal.setAttribute('data-temp-name', name);
+            modal.setAttribute('data-temp-bal', `${curr} ${bal}`);
+            cargarCuentasEnModal();
+        }
+
+        function confirmarCuenta() {
+            if (cuentaSeleccionadaTemporal === null) {
+                document.getElementById('modalCuentas').classList.remove('active');
+                return;
+            }
+
+            cuentaSeleccionadaFinal = cuentaSeleccionadaTemporal;
+            const modal = document.getElementById('modalCuentas');
+            const name = modal.getAttribute('data-temp-name');
+            const balInfo = modal.getAttribute('data-temp-bal');
+
+            document.getElementById('boxCuenta').classList.add('active');
+            document.getElementById('boxTitle').innerText = name;
+            document.getElementById('boxSub').innerText = `Saldo: ${balInfo}`;
+            document.getElementById('boxSub').style.display = 'block';
+            document.getElementById('boxAction').innerText = 'Cambiar';
+            
+            document.getElementById('modalCuentas').classList.remove('active');
+            
+            validarSiguienteMonto(); 
+        }
+
+        // --- NUEVA LÓGICA: GENERAR CUENTAS DESTINO Y PASAR A CONFIRMACIÓN ---
+        function irFormularioDestino() {
+            const btn = document.getElementById('btnSiguienteMonto');
+            if (btn.classList.contains('active')) {
+                cargarCuentasDestino();
+                cambiarVistaActiva('view-form-monto', 'view-form-destino');
+            }
+        }
+
+        function cargarCuentasDestino() {
+            const listContainer = document.getElementById('destAccountsList');
+            listContainer.innerHTML = '';
+
+            for (let i = 1; i <= 3; i++) {
+                // EXCLUSIÓN INTELIGENTE: Si es la cuenta origen, no la muestra
+                if (i === cuentaSeleccionadaFinal) continue; 
+
+                let savedName = localStorage.getItem(`ibk_acc${i}_name`) || DEFAULTS[i-1].name;
+                let savedCurr = localStorage.getItem(`ibk_acc${i}_curr`) || DEFAULTS[i-1].curr;
+                let savedBal = localStorage.getItem(`ibk_acc${i}_bal`) || DEFAULTS[i-1].bal;
+                let savedNum = localStorage.getItem(`ibk_acc${i}_num`) || "191 2058951088"; 
+                
+                let formattedBal = parseFloat(savedBal).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+                // AHORA MANDAMOS EL 'i' A LA FUNCIÓN PARA SABER QUÉ CUENTA ES LA DESTINO
+                let cardHTML = `
+                    <div class="dest-account-card" onclick="seleccionarCuentaDestino(${i}, '${savedName}', '${savedNum}')">
+                        <img src="img/target.jpg" alt="Icono Cuenta" class="dest-acc-icon">
+                        <div class="dest-acc-details">
+                            <div class="dest-acc-name">${savedName}</div>
+                            <div class="dest-acc-balance">${savedCurr} ${formattedBal}</div>
+                        </div>
+                        <div class="arrow-right">›</div>
+                    </div>
+                `;
+                listContainer.insertAdjacentHTML('beforeend', cardHTML);
+            }
+        }
+
+        function seleccionarCuentaDestino(destId, destName, destNum) {
+            // Guardamos el ID de la cuenta que recibirá el dinero
+            cuentaDestinoId = destId;
+            
+            // 1. Obtener datos de la cuenta de cargo elegida en el paso 1
+            const cargoName = document.getElementById('boxTitle').innerText;
+            const cargoNum = localStorage.getItem(`ibk_acc${cuentaSeleccionadaFinal}_num`) || "191 2058951088";
+            
+            // 2. Obtener monto y moneda
+            const monto = parseFloat(montoInput.value).toFixed(2);
+            
+            // 3. Pintar datos en la vista final
+            document.getElementById('confCargoNombre').innerText = cargoName;
+            document.getElementById('confCargoNum').innerText = cargoNum;
+            
+            document.getElementById('confDestNombre').innerText = destName;
+            document.getElementById('confDestNum').innerText = destNum;
+            
+            document.getElementById('confMontoFinal').innerText = `${currentCurrency} ${monto}`;
+
+            // 4. Cambiar a la vista de confirmación
+            cambiarVistaActiva('view-form-destino', 'view-confirmacion');
+        }
+
+        // --- PROCESAR TRANSFERENCIA ---
+        function procesarTransferencia() {
+            localStorage.setItem('ibk_trans_cargo_name', document.getElementById('confCargoNombre').innerText);
+            localStorage.setItem('ibk_trans_cargo_num', document.getElementById('confCargoNum').innerText);
+            localStorage.setItem('ibk_trans_dest_name', document.getElementById('confDestNombre').innerText);
+            localStorage.setItem('ibk_trans_dest_num', document.getElementById('confDestNum').innerText);
+            
+            const montoStr = document.getElementById('montoInput').value;
+            const montoFloat = parseFloat(montoStr);
+
+            localStorage.setItem('ibk_trans_monto', montoStr);
+            localStorage.setItem('ibk_trans_currency', currentCurrency);
+
+            // ------ LÓGICA MAESTRA: QUITAR DE UNA Y AÑADIR A OTRA ------
+            if (cuentaSeleccionadaFinal !== null && cuentaDestinoId !== null) {
+                
+                // 1. RESTAR A LA CUENTA ORIGEN (La que paga)
+                let saldoOrigen = localStorage.getItem(`ibk_acc${cuentaSeleccionadaFinal}_bal`);
+                if (!saldoOrigen) saldoOrigen = DEFAULTS[cuentaSeleccionadaFinal - 1].bal;
+                
+                let nuevoSaldoOrigen = parseFloat(saldoOrigen) - montoFloat;
+                localStorage.setItem(`ibk_acc${cuentaSeleccionadaFinal}_bal`, nuevoSaldoOrigen.toFixed(2));
+
+
+                // 2. SUMAR A LA CUENTA DESTINO (La que recibe)
+                let saldoDestino = localStorage.getItem(`ibk_acc${cuentaDestinoId}_bal`);
+                if (!saldoDestino) saldoDestino = DEFAULTS[cuentaDestinoId - 1].bal;
+                
+                let nuevoSaldoDestino = parseFloat(saldoDestino) + montoFloat;
+                localStorage.setItem(`ibk_acc${cuentaDestinoId}_bal`, nuevoSaldoDestino.toFixed(2));
+            }
+            // -----------------------------------------------------------
+
+            document.getElementById('loading-overlay').style.display = 'flex';
+
+            setTimeout(() => {
+                window.location.href = 'exitotrans.html';
+            }, 2000);
+        }
+
+    </script>
+</body>
+</html>

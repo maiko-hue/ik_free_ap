@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="manifest" href="manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Constancia de Recarga - Banca Móvil</title>
+    <link rel="icon" href="img/favicon.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <link rel="stylesheet" href="styles.css">
+
+    <style>
+        * {
+    /* Elimina el recuadro azul al hacer clic en celulares */
+    -webkit-tap-highlight-color: transparent;
+    outline: none !important;
+    
+    /* Bloquea la selección de texto en toda la app */
+    -webkit-user-select: none; 
+    -moz-user-select: none; 
+    -ms-user-select: none; 
+    user-select: none; 
+}
+
+/* Excepción para que sí se pueda seleccionar/escribir en los inputs */
+input, textarea {
+    -webkit-user-select: auto;
+    -moz-user-select: auto;
+    -ms-user-select: auto;
+    user-select: auto;
+}
+        /* HEADER - Sombra */
+        .header { display: flex; justify-content: center; align-items: center; padding: 15px 20px; background-color: #ffffff; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.06); border-bottom: none; z-index: 10; }
+        .header-title { font-size: 16px; font-weight: 700; color: #000; }
+
+        /* CONTENIDO PRINCIPAL */
+        .content { flex: 1; overflow-y: auto; padding-bottom: 120px; /* Incrementado para no ocultar el botón final */ display: flex; flex-direction: column; align-items: center; }
+        .content::-webkit-scrollbar { width: 0px; background: transparent; }
+
+        /* SECCIÓN SUPERIOR DE ÉXITO */
+        .success-header { display: flex; flex-direction: column; align-items: center; margin-top: 25px; margin-bottom: 20px; }
+        
+        /* Icono Check Verde */
+        .check-icon-container { width: 50px; height: 50px; background-color: #2bd071; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-bottom: 10px; }
+        .check-icon-container svg { width: 30px; height: 30px; stroke: white; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+        
+        .success-text { font-size: 16px; color: #000; font-weight: 400; margin-bottom: 5px; }
+        
+        /* Monto Verde */
+        .amount-display { color: #00b551; display: flex; align-items: center; justify-content: center; margin-bottom: 5px; }
+        .amount-currency { font-size: 22px; font-weight: 600; margin-right: 4px; }
+        .amount-value { font-size: 24px; font-weight: 700; }
+
+        .empresa-text { font-size: 15px; font-weight: 600; color: #000; }
+
+        /* TICKET CON BORDES ONDULADOS (SCALLOPED) - Color #F3F5F4 */
+        .ticket {
+            position: relative;
+            background-color: #F3F5F4;
+            width: 85%;
+            padding: 25px 20px;
+            margin-bottom: 30px;
+        }
+        .ticket::before {
+            content: ""; position: absolute; top: -10px; left: 0; right: 0; height: 10px;
+            background-size: 20px 20px;
+            background-image: radial-gradient(circle at 10px 10px, #F3F5F4 10px, transparent 11px);
+        }
+        .ticket::after {
+            content: ""; position: absolute; bottom: -10px; left: 0; right: 0; height: 10px;
+            background-size: 20px 20px;
+            background-image: radial-gradient(circle at 10px 0, #F3F5F4 10px, transparent 11px);
+        }
+
+        /* DATOS DEL TICKET */
+        .ticket-row { margin-bottom: 15px; display: flex; flex-direction: column; gap: 2px; }
+        .ticket-row:last-child { margin-bottom: 0; }
+        
+        .ticket-label { font-size: 14px; font-weight: 700; color: #000; }
+        .ticket-value { font-size: 14px; font-weight: 400; color: #222; }
+        .ticket-value-sub { font-size: 13.5px; color: #333; }
+
+        /* BOTÓN ENVIAR CONSTANCIA */
+        .btn-enviar-text { background: none; border: none; color: #00b551; font-size: 15px; font-weight: 600; cursor: pointer; padding: 10px; margin-bottom: 20px; }
+
+        /* --- ESTILOS NOTIFICACIÓN --- */
+        .push-notification {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-150%);
+            width: 90%;
+            max-width: 400px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            z-index: 9999;
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s;
+            cursor: grab;
+        }
+
+        .push-notification.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .push-notification.hiding {
+            transform: translateX(-50%) translateY(-150%);
+            opacity: 0;
+        }
+
+        .push-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin-right: 15px;
+        }
+
+        .push-content {
+            flex: 1;
+        }
+
+        .push-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: #000;
+            margin-bottom: 2px;
+        }
+
+        .push-message {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .push-time {
+            font-size: 12px;
+            color: #888;
+            align-self: flex-start;
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="notiSound" src="noti.mp3" preload="auto"></audio>
+
+    <div class="mobile-wrapper" id="captureArea">
+
+        <div class="push-notification" id="pushNoti">
+            <img src="img/interbank_wrdgas.webp" alt="Interbank" class="push-icon">
+            <div class="push-content">
+                <div class="push-title">Interbank</div>
+                <div class="push-message" id="pushMessage">Nombre te ha transferido S/ 0.00</div>
+            </div>
+            <div class="push-time">Ahora</div>
+        </div>
+        
+        <header class="header" id="topHeader">
+            <div class="header-title">Constancia</div>
+        </header>
+
+        <div class="content">
+            
+            <div class="success-header">
+                <div class="check-icon-container">
+                    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                <div class="success-text">Recargaste</div>
+                <div class="amount-display">
+                    <span class="amount-currency" id="finalMoneda">S/</span>
+                    <span class="amount-value" id="finalMonto">0.00</span>
+                </div>
+                <div class="empresa-text" id="finalEmpresaTop">a Empresa</div>
+            </div>
+
+            <div class="ticket">
+                
+                <div class="ticket-row">
+                    <div class="ticket-label">Cuenta a Cargo:</div>
+                    <div class="ticket-value" id="finalCargoNombre">Nombre Cuenta</div>
+                    <div class="ticket-value-sub" id="finalCargoNum">*** *** ****</div>
+                </div>
+
+                <div class="ticket-row">
+                    <div class="ticket-label">Celular:</div>
+                    <div class="ticket-value" id="finalCelular">999999999</div>
+                </div>
+
+                <div class="ticket-row">
+                    <div class="ticket-label">Fecha y hora:</div>
+                    <div class="ticket-value" id="finalFechaHora">-- --- ---- &nbsp; --:-- --</div>
+                </div>
+
+                <div class="ticket-row">
+                    <div class="ticket-label">Código de operación:</div>
+                    <div class="ticket-value" id="finalCodigo">00000000</div>
+                </div>
+
+            </div>
+
+            <button class="btn-enviar-text" id="actionButton" onclick="enviarConstancia()">Enviar constancia</button>
+
+        </div>
+
+        <nav class="bottom-nav" id="bottomNav">
+            <button class="nav-item active" onclick="window.location.href='inicio.html'">
+                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <span>Inicio</span>
+            </button>
+            <button class="nav-item" onclick="irAOperaciones()">
+                <img src="img/transferencias.jpg" alt="Operaciones" class="nav-icon-op">
+                <span>Operaciones</span>
+            </button>
+            <div class="qr-fab-container">
+                <div class="qr-fab">
+                    <img src="img/qr.png" alt="QR" style="width: 26px; height: 26px; object-fit: contain;">
+                </div>
+            </div>
+            <button class="nav-item">
+                <img src="img/beneficios.webp" alt="Beneficios" class="nav-icon-img">
+                <span>Beneficios</span>
+            </button>
+            <button class="nav-item">
+                <img src="img/para_ti.webp" alt="Para ti" class="nav-icon-img">
+                <span>Para ti</span>
+            </button>
+        </nav>
+
+    </div>
+
+    <script>
+        // --- NAVEGACIÓN A OPERACIONES ---
+        function irAOperaciones() {
+            localStorage.setItem('ibk_open_operations', 'true');
+            window.location.href = 'inicio.html';
+        }
+
+        // --- CARGAR DATOS DINÁMICOS ---
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // Traer datos de recel.html
+            const empresa = localStorage.getItem('ibk_recel_empresa') || 'Claro';
+            const celular = localStorage.getItem('ibk_recel_celular') || '111111111';
+            const cargoNombre = localStorage.getItem('ibk_recel_cargo_name') || 'Cuenta Simple Soles';
+            const moneda = localStorage.getItem('ibk_recel_currency') || 'S/';
+            
+            // Enmascarar número de cuenta (ej: 1912 05** **** 6625)
+            let cargoNumRaw = localStorage.getItem('ibk_recel_cargo_num') || '191 2058951088';
+            let cargoNumMasked = cargoNumRaw;
+            if (cargoNumRaw.replace(/\s/g, '').length >= 12) {
+                let clean = cargoNumRaw.replace(/\s/g, '');
+                cargoNumMasked = `${clean.substring(0,4)} ${clean.substring(4,6)}** **** ${clean.substring(clean.length-4)}`;
+            }
+
+            // Monto (Fuerza la extracción de números)
+            let rawMonto = localStorage.getItem('ibk_recel_monto');
+            let montoFinal = '0.00';
+            if (rawMonto) {
+                let cleanedMonto = rawMonto.replace(/[^\d.]/g, '');
+                if (cleanedMonto && !isNaN(cleanedMonto)) {
+                    montoFinal = parseFloat(cleanedMonto).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                }
+            }
+
+            // Asignar a la UI
+            document.getElementById('finalEmpresaTop').innerText = `a ${empresa}`;
+            document.getElementById('finalMoneda').innerText = moneda;
+            document.getElementById('finalMonto').innerText = montoFinal;
+            
+            document.getElementById('finalCargoNombre').innerText = cargoNombre;
+            document.getElementById('finalCargoNum').innerText = cargoNumMasked;
+            
+            document.getElementById('finalCelular').innerText = celular;
+
+            // Generar Código de Operación aleatorio (8 dígitos)
+            const opCode = Math.floor(10000000 + Math.random() * 90000000);
+            document.getElementById('finalCodigo').innerText = `0${opCode}`.slice(-8);
+
+            // Generar Fecha y Hora Actual
+            const now = new Date();
+            const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+            const day = now.getDate().toString().padStart(2, '0');
+            const month = months[now.getMonth()];
+            const year = now.getFullYear();
+            
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            const timeStr = `${hours.toString().padStart(2, '0')}:${minutes} ${ampm}`;
+            
+            document.getElementById('finalFechaHora').innerHTML = `${day} ${month} ${year} &nbsp;&nbsp; ${timeStr}`;
+        });
+
+        // --- LÓGICA PARA COMPARTIR CONSTANCIA ---
+        function enviarConstancia() {
+            const captureArea = document.getElementById('captureArea');
+            const actionButton = document.getElementById('actionButton');
+            const bottomNav = document.getElementById('bottomNav');
+            
+            // Ocultamos elementos de navegación e interacción antes de tomar la "foto"
+            actionButton.style.display = 'none';
+            bottomNav.style.display = 'none';
+
+            setTimeout(() => {
+                html2canvas(captureArea, {
+                    scale: 2, 
+                    backgroundColor: '#ffffff' 
+                }).then(canvas => {
+                    canvas.toBlob(blob => {
+                        let empresa = localStorage.getItem('ibk_recel_empresa') || 'Recarga';
+                        let nombreParaArchivo = empresa.replace(/[^a-zA-Z0-9]/g, "_");
+                        const file = new File([blob], `Constancia_Recarga_${nombreParaArchivo}.png`, { type: 'image/png' });
+                        
+                        if (navigator.share) {
+                            navigator.share({
+                                title: `Recarga de celular a ${empresa}`,
+                                files: [file]
+                            }).then(() => {
+                                restaurarUI(actionButton, bottomNav);
+                            }).catch(err => {
+                                console.log('Error al compartir:', err);
+                                restaurarUI(actionButton, bottomNav);
+                            });
+                        } else {
+                            const link = document.createElement('a');
+                            link.download = `Constancia_Recarga_${nombreParaArchivo}.png`;
+                            link.href = canvas.toDataURL('image/png');
+                            link.click();
+                            restaurarUI(actionButton, bottomNav);
+                        }
+                    });
+                });
+            }, 150); 
+        }
+
+        // Función para devolver los botones a la vista después de compartir
+        function restaurarUI(actionButton, bottomNav) {
+            actionButton.style.display = 'block';
+            bottomNav.style.display = 'flex';
+        }
+    </script>
+</body>
+</html>

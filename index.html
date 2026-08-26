@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bienvenido</title>
+    <link rel="icon" href="img/favicon.png" type="image/png">
+    
+    <script>
+        if (localStorage.getItem('sesion_iniciada') === 'true') {
+            window.location.replace('login_pin.html');
+        }
+    </script>
+    
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="apple-touch-icon" href="./img/favicon.png">
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('¡Motor de App conectado!', reg.scope))
+                    .catch(err => console.error('Error de conexión:', err));
+            });
+        }
+    </script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            outline: none !important;
+            -webkit-user-select: none; 
+            -moz-user-select: none; 
+            -ms-user-select: none; 
+            user-select: none; 
+            box-sizing: border-box;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        input, textarea {
+            -webkit-user-select: auto;
+            -moz-user-select: auto;
+            -ms-user-select: auto;
+            user-select: auto;
+        }
+
+        :root {
+            --brand-blue: #0039a6;
+            --brand-dark: #001e60;
+            --brand-green: #00b551;
+            --bg-light: #f2f4f7; /* Fondo gris claro */
+        }
+        
+        body {
+            margin: 0;
+            background-color: var(--bg-light);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--brand-blue);
+            padding: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- FORMAS GEOMÉTRICAS DE FONDO --- */
+        .top-shape-left {
+            position: absolute;
+            top: -100px;
+            left: -100px;
+            width: 350px;
+            height: 350px;
+            background-color: var(--brand-green);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 0;
+        }
+        .top-shape-left img {
+            width: 140px;
+            margin-top: 80px;
+            margin-left: 80px;
+            object-fit: contain;
+        }
+
+        .top-shape-right {
+            position: absolute;
+            top: -80px;
+            right: -80px;
+            width: 200px;
+            height: 200px;
+            background-color: var(--brand-green);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 0;
+        }
+        .top-shape-right img {
+            width: 40px;
+            border-radius: 8px;
+            margin-top: 60px;
+            margin-right: 60px;
+            object-fit: contain;
+        }
+
+        /* --- TEXTOS PRINCIPALES --- */
+        .welcome-title, .install-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--brand-dark);
+            text-align: center;
+            line-height: 1.4;
+            z-index: 2;
+            position: relative;
+            margin-top: 80px; 
+            margin-bottom: 40px;
+        }
+
+        .install-title { font-size: 22px; margin-top: 40px; }
+
+        /* --- CAJA BLANCA CONTENEDORA DE BOTONES --- */
+        .action-box {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            width: 100%;
+            max-width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 2;
+            position: relative;
+        }
+        
+        /* --- BOTONES DE BIENVENIDA --- */
+        .btn-google {
+            background-color: white; color: #333; width: 100%; padding: 14px;
+            border-radius: 8px; border: 1px solid #e0e4e8; font-size: 15px; font-weight: 700;
+            display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s; text-decoration: none;
+        }
+        .btn-access {
+            background-color: var(--brand-green); color: white; width: 100%; padding: 14px;
+            border-radius: 8px; border: none; font-size: 15px; font-weight: 700;
+            display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer;
+            transition: background 0.2s, transform 0.2s; text-decoration: none;
+        }
+        
+        .btn-google:active, .btn-access:active { transform: scale(0.97); }
+        .btn-google:active { background-color: #f5f5f5; }
+        .btn-access:active { background-color: #009e47; }
+        .google-icon { width: 20px; height: 20px; }
+
+        /* --- PANTALLA DE INSTALACIÓN --- */
+        #pantallaInstalacion { 
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
+            background-color: var(--bg-light); z-index: 999999; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+        }
+
+        .btn-install {
+            background-color: var(--brand-green); color: white; width: 100%; padding: 14px;
+            border-radius: 30px; border: none; font-size: 15px; font-weight: 700;
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+            cursor: pointer; box-shadow: 0 4px 15px rgba(0, 181, 81, 0.3);
+        }
+        .btn-omitir { 
+            background: transparent; color: #888; border: none; 
+            font-size: 13.5px; font-weight: 600; cursor: pointer; 
+            text-decoration: underline; margin-top: 5px; 
+        }
+
+        /* --- FOOTER Y MODAL --- */
+        .footer-links { position: absolute; bottom: 35px; font-size: 13.5px; font-weight: 600; text-align: center; width: 100%; display: flex; justify-content: center; gap: 20px; z-index: 2; }
+        .footer-link { color: var(--brand-blue); text-decoration: none; cursor: pointer; opacity: 0.8; }
+        .footer-link:active { opacity: 1; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: none; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(3px); }
+        .modal-card { background: white; color: #333; width: 100%; max-width: 340px; border-radius: 16px; padding: 25px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 15px; color: var(--brand-blue); }
+        .modal-body { font-size: 14px; line-height: 1.5; color: #555; margin-bottom: 20px; text-align: left; }
+        .warning-text { color: #d32f2f; font-weight: 700; margin-top: 12px; display: block; border: 1px solid #ffcdd2; background: #ffebee; padding: 12px; border-radius: 8px; font-size: 13px; }
+        .dev-credits { font-size: 12px; color: #888; margin-top: 15px; font-weight: 700; display: block; text-align: center; }
+        .btn-telegram { background-color: #229ED9; color: white; width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; margin-bottom: 10px; text-decoration: none; display: block; }
+        .btn-close { background: #f0f4f8; color: var(--brand-blue); width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 800; font-size: 15px; cursor: pointer; }
+
+        /* --- PANTALLA DE ÉXITO --- */
+        #successOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--brand-green);
+            z-index: 3000;
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+            color: white; text-align: center; padding: 25px;
+            animation: fadeIn 0.4s ease-out;
+        }
+        .success-icon { font-size: 65px; margin-bottom: 25px; animation: floatIcon 2s ease-in-out infinite; }
+        .success-title { font-size: 24px; font-weight: 800; margin-bottom: 15px; letter-spacing: -0.5px; }
+        .success-desc { font-size: 16px; font-weight: 500; line-height: 1.5; max-width: 300px; opacity: 0.9; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes floatIcon { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+    </style>
+</head>
+<body>
+
+    <div id="successOverlay">
+        <i class="fa-solid fa-paper-plane success-icon"></i>
+        <div class="success-title">¡Solicitud enviada!</div>
+        <div class="success-desc">Si ya adquiriste tu acceso, te aprobaremos pronto. Verificando...</div>
+    </div>
+
+    <!-- PANTALLA DE INSTALACIÓN REDISEÑADA -->
+    <div id="pantallaInstalacion">
+        <!-- Formas de fondo repetidas para que se superpongan correctamente -->
+        <div class="top-shape-left">
+            <img src="img/secondlogo.png" alt="AppsReborn">
+        </div>
+        <div class="top-shape-right">
+            <img src="img/icon.webp" alt="Logo">
+        </div>
+
+        <div class="install-title">
+            Antes de continuar;<br>instala la app en tu<br>dispositivo:
+        </div>
+
+        <div class="action-box">
+            <button id="btnInstalarApp" class="btn-install" style="display: none;">
+                <i class="fa-solid fa-download"></i> Instalar ahora
+            </button>
+            <button id="btnOmitir" class="btn-omitir">Omitir por ahora</button>
+        </div>
+    </div>
+
+    <!-- FORMAS DE FONDO (PANTALLA DE BIENVENIDA) -->
+    <div class="top-shape-left">
+        <img src="img/secondlogo.png" alt="AppsReborn">
+    </div>
+    <div class="top-shape-right">
+        <img src="img/icon.webp" alt="Logo">
+    </div>
+
+    <!-- CONTENIDO PANTALLA DE BIENVENIDA -->
+    <div class="welcome-title">
+        ¡Bienvenido!<br>Tenemos funciones nuevas<br>y mejoradas para ti...
+    </div>
+
+    <div class="action-box">
+        <button class="btn-google" id="btnGoogleAuth">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="G" class="google-icon">
+            <span id="btnText">Continuar con Google</span>
+        </button>
+
+        <a href="https://t.me/vendedoresappsreborn" class="btn-access">
+            <i class="fa-brands fa-telegram" style="font-size: 18px;"></i>
+            Obtén acceso
+        </a>
+    </div>
+
+    <div class="footer-links">
+        <span class="footer-link" onclick="openModal()">Términos y Condiciones</span>
+        <a href="https://t.me/MaikolEsleiter" class="footer-link">Centro de Ayuda</a>
+    </div>
+
+    <div class="modal-overlay" id="termsModal">
+        <div class="modal-card">
+            <div class="modal-title">Términos y Condiciones</div>
+            <div class="modal-body">
+                <strong>Lee atentamente esto:</strong><br><br>
+                El personal de administración no se hace responsable del mal uso de la app. No hay devoluciones ni cargos a enfrentar.<br>
+                <span class="warning-text">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    NO TOLERAMOS el uso de varios dispositivos enlazados. Si compartes acceso, tu cuenta quedará BANEADA DE FORMA PERMANENTE.
+                </span><br>
+                Tendrás que comprar otro acceso para remediar eso. Avisados están.
+                <span class="dev-credits">Desarrollador/Dev: @MaikolEsleiter</span>
+            </div>
+            <a href="https://t.me/appsreborn" class="btn-telegram"><i class="fa-brands fa-telegram"></i> Grupo Oficial</a>
+            <button class="btn-close" onclick="closeModal()">Entendido</button>
+        </div>
+    </div>
+
+    <script>
+        const pantallaInstalacion = document.getElementById('pantallaInstalacion');
+        const btnInstalar = document.getElementById('btnInstalarApp');
+        const btnOmitir = document.getElementById('btnOmitir');
+        let promptDiferido;
+
+        btnOmitir.addEventListener('click', () => { pantallaInstalacion.style.display = 'none'; });
+
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+            pantallaInstalacion.style.display = 'none';
+        } else {
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault(); promptDiferido = e; btnInstalar.style.display = 'flex'; 
+            });
+            btnInstalar.addEventListener('click', async () => {
+                if (promptDiferido) {
+                    promptDiferido.prompt(); 
+                    const { outcome } = await promptDiferido.userChoice;
+                    if (outcome === 'accepted') promptDiferido = null;
+                }
+            });
+            window.addEventListener('appinstalled', () => { pantallaInstalacion.style.display = 'none'; });
+        }
+
+        const modal = document.getElementById('termsModal');
+        function openModal() { modal.style.display = 'flex'; }
+        function closeModal() { modal.style.display = 'none'; }
+        window.onclick = function(event) { if (event.target == modal) closeModal(); }
+    </script>
+
+    <script type="module">
+        import { auth, db } from "./firebase.js";
+        import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const btnGoogle = document.getElementById('btnGoogleAuth');
+        const btnText = document.getElementById('btnText');
+        const successOverlay = document.getElementById('successOverlay');
+
+        // Escuchador pasivo: Si ya tiene sesión viva en Firebase y ya entró antes, lo manda al PIN
+        onAuthStateChanged(auth, (user) => {
+            if (user && localStorage.getItem('sesion_iniciada') === 'true') {
+                window.location.replace("login_pin.html");
+            }
+        });
+
+        // 1. FUNCIÓN DE BLOQUEO: Muestra el cartel verde de Interbank y cierra sesión
+        function mostrarModalInactivo(user) {
+            document.body.innerHTML += `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px);">
+                    <div style="background: white; width: 85%; max-width: 320px; border-radius: 20px; padding: 30px 20px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.4); animation: popIn 0.3s ease-out;">
+                        <i class="fa-solid fa-circle-user" style="font-size: 55px; color: #00b551; margin-bottom: 20px;"></i>
+                        <div style="font-size: 20px; font-weight: 700; color: #333; margin-bottom: 12px;">¡Cuenta no activada!</div>
+                        <div style="font-size: 14px; color: #666; margin-bottom: 25px; line-height: 1.6;">Hola <strong>${user.displayName || 'Usuario'}</strong>, tu acceso al ibk se encuentra <strong>inactivo</strong>. Contacta a soporte para validarlo.</div>
+                        <a href="https://t.me/MaikolEsleiter" style="background-color: #00b551; color: white; border: none; width: 100%; padding: 15px; border-radius: 15px; font-size: 16px; font-weight: 700; cursor: pointer; display: block; text-decoration: none; margin-bottom: 12px;">Contactar Soporte</a>
+                        <button style="background: none; border: none; color: #888; font-size: 14px; font-weight: 600; cursor: pointer;" onclick="location.reload()">Volver al inicio</button>
+                    </div>
+                </div>
+            `;
+            // Cierra la sesión inmediatamente para evitar colados
+            signOut(auth);
+        }
+
+        // 2. FUNCIÓN DE ANIMACIÓN: Muestra el avión verde por 3.5s y luego lo bloquea
+        function mostrarAnimacionYRechazar(user) {
+            successOverlay.style.display = 'flex';
+            setTimeout(() => {
+                successOverlay.style.display = 'none';
+                mostrarModalInactivo(user); // ¡Boom! Puerta cerrada.
+            }, 3500); 
+        }
+
+        // PopUp que hace todo en la misma pantalla
+        btnGoogle.addEventListener('click', async () => {
+            btnGoogle.disabled = true;
+            btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Conectando...';
+
+            try {
+                const provider = new GoogleAuthProvider();
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+
+                btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verificando...';
+
+                const userRef = doc(db, "clientes_ibk", user.email);
+                const userSnap = await getDoc(userRef);
+
+                const ticketSesion = "token_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
+                localStorage.setItem("sesion_token_ibk", ticketSesion);
+
+                if (!userSnap.exists()) {
+                    // Es completamentee NUEVO: Guardamos datos, animamos y BLOQUEAMOS
+                    await setDoc(userRef, {
+                        nombre: user.displayName,
+                        email: user.email,
+                        estado: "inactivo",
+                        fecha: new Date().toISOString(),
+                        sesion_token: ticketSesion
+                    });
+                    mostrarAnimacionYRechazar(user);
+                } else {
+                    // Ya existe. Actualizamos ticket de seguridad
+                    await updateDoc(userRef, { sesion_token: ticketSesion });
+                    
+                    if (userSnap.data().estado === "activo") {
+                        // Es VIP: Abre la puerta al PIN
+                        window.location.replace("login_pin.html");
+                    } else {
+                        // Sigue inactivo: Bloqueo inmediato sin volver a ver el avioncito
+                        mostrarModalInactivo(user);
+                    }
+                }
+
+            } catch (error) {
+                console.error("Error al iniciar sesión:", error);
+                btnGoogle.disabled = false;
+                btnText.innerHTML = 'Continuar con Google';
+            }
+        });
+    </script>
+    
+    <script type="module" src="seguridad.js"></script>
+</body>
+</html>

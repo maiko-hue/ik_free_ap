@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Login - Interbank</title>
+    <link rel="icon" href="img/favicon.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ==================================================
+           REGLAS DE REALISMO Y ANTI-SELECCIÓN (NATIVO)
+           ================================================== */
+        * {
+            -webkit-tap-highlight-color: transparent !important;
+            -webkit-touch-callout: none !important; 
+            -webkit-user-select: none !important; 
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+            outline: none !important;
+            box-sizing: border-box;
+        }
+
+        /* Excepción para permitir escribir en el input */
+        input, textarea {
+            -webkit-user-select: auto !important;
+            user-select: auto !important;
+        }
+
+        /* Bloquea la descarga de imágenes */
+        img {
+            pointer-events: none;
+            -webkit-user-drag: none;
+        }
+
+        button, a {
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        :root {
+            --ibk-green: #00B14F;
+            --ibk-blue: #0039A6;
+            --bg-light: #ffffff;
+            --text-dark: #333333;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--ibk-green);
+            height: 100vh;
+            overflow: hidden;
+            overscroll-behavior-y: none;
+        }
+
+        .mobile-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 480px;
+            margin: 0 auto;
+            position: relative;
+            background-color: var(--ibk-green);
+        }
+
+        /* --- ZONA SUPERIOR VERDE --- */
+        .top-green-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 20px 25px;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 20px;
+            padding: 0;
+        }
+
+        .header-logo {
+            height: 55px;
+            object-fit: contain;
+        }
+
+        .greeting-text {
+            color: white;
+            font-size: 22px;
+            font-weight: 400;
+            margin-top: 15px;
+            letter-spacing: 0.5px;
+        }
+        .greeting-text strong {
+            font-weight: 800;
+        }
+
+        /* --- QR GRANDE --- */
+        .qr-container {
+            background: white;
+            padding: 10px;
+            border-radius: 12px;
+            width: 180px;
+            height: 180px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .qr-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+            filter: brightness(0); /* Forzamos el color negro */
+        }
+
+        /* --- BANNER WHATSAPP --- */
+        .wa-banner {
+            background-color: #005E1F;
+            width: 90%;
+            max-width: 340px;
+            border-radius: 30px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 25px;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .wa-banner img {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+        }
+
+        /* --- TARJETA BLANCA INFERIOR --- */
+        .bottom-white-card {
+            background-color: var(--bg-light);
+            border-radius: 25px 25px 0 0;
+            padding: 35px 25px 60px 25px; /* Padding inferior aumentado para los botones de navegación */
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Truco para enmascarar la contraseña sin usar type="password" */
+        .masked-input {
+            -webkit-text-security: disc;
+            text-security: disc;
+        }
+        .unmasked-input {
+            -webkit-text-security: none;
+            text-security: none;
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            border: 1px solid #e0e4e8;
+            border-radius: 12px;
+            padding: 0 18px;
+            height: 55px;
+            background-color: white;
+        }
+
+        .pass-input {
+            border: none;
+            background: transparent;
+            flex: 1;
+            font-size: 16px;
+            color: #333;
+            letter-spacing: 2px;
+            height: 100%;
+        }
+
+        .pass-input::placeholder {
+            color: #aaa;
+            letter-spacing: normal;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .eye-toggle {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+            cursor: pointer;
+            opacity: 1;
+            filter: brightness(0) invert(0.16); /* Convierte la imagen al color #282828 */
+            pointer-events: auto; /* Para que se pueda clickear */
+        }
+
+        /* --- BOTONES --- */
+        .btn-ingresar {
+            background-color: var(--ibk-blue);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            transition: 0.2s;
+        }
+        .btn-ingresar:active { filter: brightness(0.9); }
+        .btn-ingresar.disabled-btn { background-color: #A0B2D8; pointer-events: none; }
+
+        .btn-huella {
+            background-color: transparent;
+            color: var(--ibk-blue);
+            border: 2px solid var(--ibk-blue);
+            border-radius: 30px;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: 0.2s;
+        }
+        .btn-huella:active { background-color: #f0f4f8; }
+        .btn-huella i { font-size: 18px; }
+
+        .links-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 15px;
+            gap: 15px;
+        }
+
+        .forgot-link {
+            color: #333;
+            font-weight: 700;
+            font-size: 14px;
+            text-decoration: none;
+        }
+
+        .version-text {
+            color: #a0a0a0;
+            font-size: 11px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-wrapper">
+        
+        <!-- ZONA VERDE SUPERIOR -->
+        <div class="top-green-section">
+            <div class="header-bar">
+                <button class="icon-btn"><i class="fa-solid fa-bars"></i></button>
+                <img src="img/logo.svg" alt="Interbank" class="header-logo">
+                <button class="icon-btn"><i class="fa-solid fa-lock" style="font-size: 12px; border: 1.5px solid white; padding: 5px 6px; border-radius: 6px;"></i></button>
+            </div>
+            
+            <!-- Saludo Dinámico -->
+            <div class="greeting-text">Hola, <strong id="userNameDisplay">Usuario</strong></div>
+
+            <!-- QR Random -->
+            <div class="qr-container">
+                <img src="img/qr.png" alt="Mi QR">
+            </div>
+
+            <!-- Banner WhatsApp -->
+            <div class="wa-banner">
+                <img src="img/whatsapp1.png" alt="WhatsApp">
+                <span>¡Plinea por WhatsApp sin abrir tu APP!</span>
+                <i class="fa-solid fa-arrow-right" style="font-size: 14px;"></i>
+            </div>
+        </div>
+
+        <!-- ZONA BLANCA INFERIOR -->
+        <div class="bottom-white-card">
+            
+            <!-- Input Truqueado (type="tel" + CSS text-security) -->
+            <div class="input-wrapper">
+                <input type="tel" id="passInput" class="pass-input masked-input" placeholder="Ingresa tu contraseña" maxlength="6" autocomplete="off" spellcheck="false" name="random_field_name">
+                <img src="img/close-eye.svg" alt="Mostrar" class="eye-toggle" id="eyeIcon" onclick="togglePassword()">
+            </div>
+
+            <button class="btn-ingresar disabled-btn" id="ingresarBtn" onclick="intentarIngresar()">Ingresar</button>
+            
+            <button class="btn-huella">
+                <i class="fa-solid fa-fingerprint"></i> Ingresar con huella digital
+            </button>
+
+            <div class="links-area">
+                <a href="#" class="forgot-link">Olvidé mi contraseña</a>
+                <span class="version-text">v23.0.1</span>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- SCRIPT DE SEGURIDAD (MANTENIDO INTACTO) -->
+    <script type="module" src="seguridad.js"></script>
+
+    <!-- OBTENCIÓN DINÁMICA DEL NOMBRE Y FUNCIONAMIENTO DEL INPUT -->
+    <script type="module">
+        import { auth } from "./firebase.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // 1. Obtener y pintar solo el PRIMER NOMBRE
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                let fullName = user.displayName || "Usuario";
+                let firstName = fullName.split(" ")[0]; // Corta el string y toma solo la primera palabra
+                document.getElementById('userNameDisplay').innerText = firstName;
+            }
+        });
+    </script>
+
+    <script>
+        const passInput = document.getElementById('passInput');
+        const eyeIcon = document.getElementById('eyeIcon');
+        const ingresarBtn = document.getElementById('ingresarBtn');
+
+        // 2. Alternar visualización de la contraseña (Usando el truco CSS en lugar del type)
+        function togglePassword() {
+            if (passInput.classList.contains('masked-input')) {
+                // Mostrar números
+                passInput.classList.remove('masked-input');
+                passInput.classList.add('unmasked-input');
+                eyeIcon.src = 'img/open-eye.svg';
+            } else {
+                // Ocultar números (Puntitos)
+                passInput.classList.remove('unmasked-input');
+                passInput.classList.add('masked-input');
+                eyeIcon.src = 'img/close-eye.svg';
+            }
+        }
+
+        // 3. Activar el botón azul solo cuando haya 6 dígitos
+        passInput.addEventListener('input', function() {
+            // Solo permite números
+            this.value = this.value.replace(/[^0-9]/g, '');
+            
+            if (this.value.length === 6) {
+                ingresarBtn.classList.remove('disabled-btn');
+            } else {
+                ingresarBtn.classList.add('disabled-btn');
+            }
+        });
+
+        // 4. Validación final al presionar "Ingresar"
+        function intentarIngresar() {
+            if (passInput.value.length === 6) {
+                localStorage.setItem('sesion_iniciada', 'true');
+                window.location.href = 'inicio.html';
+            }
+        }
+
+        // Permitir ingreso con la tecla Enter
+        passInput.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                intentarIngresar();
+            }
+        });
+    </script>
+</body>
+</html>

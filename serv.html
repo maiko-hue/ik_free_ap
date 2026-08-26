@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="manifest" href="manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Servicios - Banca Móvil</title>
+    <link rel="icon" href="img/favicon.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
+
+    <style>
+        * {
+    /* Elimina el recuadro azul al hacer clic en celulares */
+    -webkit-tap-highlight-color: transparent;
+    outline: none !important;
+    
+    /* Bloquea la selección de texto en toda la app */
+    -webkit-user-select: none; 
+    -moz-user-select: none; 
+    -ms-user-select: none; 
+    user-select: none; 
+}
+
+/* Excepción para que sí se pueda seleccionar/escribir en los inputs */
+input, textarea {
+    -webkit-user-select: auto;
+    -moz-user-select: auto;
+    -ms-user-select: auto;
+    user-select: auto;
+}
+        /* HEADER */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background-color: #ffffff; flex-shrink: 0; border-bottom: 1px solid #f0f0f0; z-index: 10; }
+        .back-btn { background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px; width: 30px; }
+        .back-btn svg { width: 20px; height: 20px; stroke: #00b551; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+        .header-title { font-size: 18px; font-weight: 700; color: #000; text-align: center; flex-grow: 1; }
+        .header-spacer { width: 30px; }
+
+        /* VISTAS */
+        .view { display: none; flex-direction: column; height: 100%; overflow-y: auto; }
+        .view.active { display: flex; }
+        .view::-webkit-scrollbar { width: 0px; background: transparent; }
+
+        /* --- VISTA 1: FORMULARIO SERVICIOS --- */
+        .form-wrapper { padding: 25px 20px; flex: 1; display: flex; flex-direction: column; position: relative; }
+        
+        .input-group { margin-bottom: 25px; position: relative; }
+        .input-label { font-size: 14px; color: #000; font-weight: 700; margin-bottom: 5px; display: block; }
+        
+        .line-input { width: 100%; border: none; border-bottom: 1px solid #f0f0f0; padding: 8px 0; font-size: 15px; color: #333; background: transparent; transition: border-color 0.3s; }
+        .line-input:focus { border-bottom-color: #00b551; }
+        .line-input::placeholder { color: #999; font-weight: 400; }
+
+        .row-inputs { display: flex; gap: 20px; }
+        .row-inputs .input-group { flex: 1; margin-bottom: 15px; }
+
+        .btn-siguiente { background-color: #f0f0f0; color: #a0a0a0; border: none; width: 100%; padding: 16px; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: default; transition: 0.3s; margin-top: 30px; margin-bottom: 20px; }
+        .btn-siguiente.active { background-color: #04BE4F; color: white; cursor: pointer; }
+        .btn-siguiente.active:active { background-color: #03a042; }
+
+        /* --- CALENDARIO FLOTANTE DINÁMICO --- */
+        .date-picker-modal {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border: 1px solid #f0f0f0;
+            padding: 15px;
+            z-index: 1000;
+            display: none;
+            margin-top: 5px;
+        }
+        .date-picker-modal.active { display: block; }
+
+        .dp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 10px; }
+        .dp-header span { font-size: 14px; font-weight: 700; color: #000; }
+        .dp-nav { color: #666; font-size: 18px; cursor: pointer; user-select: none; padding: 5px 10px; }
+        .dp-nav:active { background-color: #f0f0f0; border-radius: 4px; }
+
+        .dp-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
+        .dp-day-name { font-size: 12px; font-weight: 700; color: #000; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0; margin-bottom: 5px; }
+        
+        .dp-day { font-size: 13px; color: #333; padding: 8px 0; cursor: pointer; border-radius: 50%; user-select: none; transition: background-color 0.2s, color 0.2s; }
+        .dp-day:active { background-color: #f0f0f0; }
+        .dp-day.disabled { color: #ccc; pointer-events: none; }
+        .dp-day.selected { background-color: #00b551; color: #fff; font-weight: 700; }
+
+        /* --- VISTA 2: LISTA DE CUENTAS --- */
+        .accounts-wrapper { padding: 20px; flex: 1; background-color: #fafbfc; }
+        .subtitle { font-size: 15px; font-weight: 700; color: #000; margin-bottom: 20px; }
+
+        .account-card { background-color: #ffffff; border-radius: 10px; padding: 18px 15px; margin-bottom: 12px; display: flex; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #f0f0f0; cursor: pointer; transition: background-color 0.2s; }
+        .account-card:active { background-color: #f9f9f9; }
+        .acc-icon { width: 55px; height: 40px; object-fit: cover; border-radius: 6px; margin-right: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .acc-details { flex: 1; }
+        .acc-name { font-size: 14px; font-weight: 400; color: #000; margin-bottom: 2px; }
+        .acc-balance { font-size: 16px; font-weight: 700; color: #000; }
+        .arrow-right { color: #00b551; font-size: 24px; font-weight: 800; transform: scaleY(1.2); margin-left: 10px; }
+
+        /* --- VISTA 3: CONFIRMACIÓN --- */
+        .conf-content { flex: 1; padding: 20px; display: flex; flex-direction: column; background-color: #ffffff; }
+        .conf-header { text-align: center; margin: 15px 0 25px; } 
+        .conf-header-main { font-size: 20px; color: #000; font-weight: 400; line-height: 1.3; }
+        .conf-header-main strong { font-weight: 800; }
+        
+        .conf-subtitle { font-size: 16px; color: #000; font-weight: 500; margin-bottom: 20px; } 
+        
+        .conf-row { margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 12px; }
+        .conf-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        
+        .conf-label { font-size: 12px; color: #888; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px; }
+        .conf-val { font-size: 15px; color: #000; font-weight: 400; line-height: 1.2; }
+        
+        .text-group { display: flex; flex-direction: column; gap: 4px; }
+
+        /* --- PANTALLA DE CARGA (ANIMACIÓN) --- */
+        #loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(255, 255, 255, 0.95); z-index: 9999;
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+        }
+        .spinner-container { position: relative; width: 80px; height: 80px; display: flex; justify-content: center; align-items: center; }
+        .spinner-ring { position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 4px solid #f0f0f0; }
+        .spinner-spin { position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 4px solid transparent; border-top-color: #00b551; animation: spin 1s linear infinite; }
+        .spinner-icon { width: 35px; height: 35px; object-fit: contain; z-index: 2; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body>
+
+    <div id="loading-overlay">
+        <div class="spinner-container">
+            <div class="spinner-ring"></div>
+            <div class="spinner-spin"></div>
+            <img src="img/icon.webp" alt="Cargando" class="spinner-icon">
+        </div>
+    </div>
+
+    <div class="mobile-wrapper">
+        
+        <header class="header">
+            <button class="back-btn" onclick="goBack()">
+                <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <div class="header-title">Servicios</div>
+            <div class="header-spacer"></div>
+        </header>
+
+        <div id="view-form" class="view active">
+            <div class="form-wrapper">
+                
+                <div class="input-group">
+                    <label class="input-label">Empresa</label>
+                    <input type="text" id="empresaInput" class="line-input form-req" placeholder="Ej: SEDAPAL" autocomplete="off">
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Servicio</label>
+                    <input type="text" id="servicioInput" class="line-input form-req" placeholder="Ej: Agua Potable" autocomplete="off">
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Datos</label>
+                    <input type="text" id="titularInput" class="line-input form-req" placeholder="Titular" style="margin-bottom: 12px;" autocomplete="off">
+                    <input type="text" id="codigoInput" class="line-input form-req" placeholder="Código" autocomplete="off">
+                </div>
+
+                <div class="row-inputs" style="position: relative;">
+                    <div class="input-group" style="flex: 1;">
+                        <label class="input-label">Monto</label>
+                        <input type="number" id="montoInput" class="line-input form-req" placeholder="0.00" step="0.01">
+                    </div>
+                    
+                    <div class="input-group" style="flex: 1;" id="dateContainer">
+                        <label class="input-label">Vencimiento</label>
+                        <input type="text" id="fechaInput" class="line-input form-req" placeholder="dd/mm" maxlength="5" readonly style="cursor: pointer; background-color: transparent;">
+                        
+                        <div class="date-picker-modal" id="datePicker">
+                            <div class="dp-header">
+                                <span class="dp-nav" id="btnPrevMonth">‹</span>
+                                <span id="currentMonthYear">Febrero &nbsp;&nbsp; 2026</span>
+                                <span class="dp-nav" id="btnNextMonth">›</span>
+                            </div>
+                            <div class="dp-grid" id="calendarGrid">
+                                </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <button class="btn-siguiente" id="btnSiguienteForm" onclick="irCuentas()">Siguiente</button>
+
+            </div>
+        </div>
+
+        <div id="view-cuentas" class="view">
+            <div class="accounts-wrapper">
+                <div class="subtitle">Elige la cuenta de cargo</div>
+                <div id="accountsListContainer">
+                    </div>
+            </div>
+        </div>
+
+        <div id="view-confirmacion" class="view">
+            <div class="conf-content">
+                
+                <div class="conf-header">
+                    <div class="conf-header-main">Estas a un paso de<br><strong>realizar el pago de tus servicios</strong></div>
+                </div>
+
+                <div class="conf-subtitle">Confirma la información</div>
+
+                <div class="conf-row">
+                    <div class="conf-label">INSTITUCIÓN O EMPRESA</div>
+                    <div class="conf-val" id="confEmpresa">Sedapal</div>
+                </div>
+
+                <div class="conf-row">
+                    <div class="conf-label">SERVICIO</div>
+                    <div class="conf-val" id="confServicio">1212</div>
+                </div>
+
+                <div class="conf-row">
+                    <div class="conf-label">CUENTA A CARGO</div>
+                    <div class="conf-val text-group">
+                        <span id="confCargoNombre">Cuenta Simple Soles</span>
+                        <span id="confCargoNum" style="color: #666; font-size: 14px;">191 2058951088</span>
+                    </div>
+                </div>
+
+                <div class="conf-row">
+                    <div class="conf-label">DATOS</div>
+                    <div class="conf-val text-group">
+                        <span id="confTitular">Nombre Titular</span>
+                        <span id="confCodigo" style="color: #666; font-size: 14px;">121</span>
+                    </div>
+                </div>
+
+                <div class="conf-row" style="border-bottom: none;">
+                    <div class="conf-label">MONEDA Y MONTO</div>
+                    <div class="conf-val" id="confMontoFinal">US$ 123.00</div>
+                </div>
+
+                <button class="btn-siguiente active" style="margin-top: 30px; margin-bottom: 20px;" onclick="procesarPagoServicio()">Confirmar</button>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- 1. DATOS POR DEFECTO ---
+        const DEFAULTS = [
+            { name: "Cuenta Simple Soles", curr: "S/", bal: "1000.00", num: "191 2058951088" },
+            { name: "Cuenta Simple Dolares", curr: "US$", bal: "1000.00", num: "191 2058956625" },
+            { name: "Cuenta de Ahorros", curr: "S/", bal: "1000.00", num: "191 1111111111" }
+        ];
+
+        // Variable global para guardar el ID de la cuenta que elegimos
+        let cuentaSeleccionadaId = null;
+
+        // --- 2. NAVEGACIÓN ---
+        function cambiarVistaActiva(idOcultar, idMostrar) {
+            document.getElementById(idOcultar).classList.remove('active');
+            document.getElementById(idMostrar).classList.add('active');
+        }
+
+        function goBack() {
+            const viewForm = document.getElementById('view-form');
+            const viewCuentas = document.getElementById('view-cuentas');
+            const viewConfirmacion = document.getElementById('view-confirmacion');
+
+            if (viewConfirmacion.classList.contains('active')) {
+                cambiarVistaActiva('view-confirmacion', 'view-cuentas');
+            } else if (viewCuentas.classList.contains('active')) {
+                cambiarVistaActiva('view-cuentas', 'view-form');
+            } else {
+                window.location.href = 'inicio.html';
+            }
+        }
+
+        // --- 3. LÓGICA DEL CALENDARIO DINÁMICO ---
+        const fechaInput = document.getElementById('fechaInput');
+        const datePicker = document.getElementById('datePicker');
+        const calendarGrid = document.getElementById('calendarGrid');
+        const currentMonthYearDisplay = document.getElementById('currentMonthYear');
+        const btnPrevMonth = document.getElementById('btnPrevMonth');
+        const btnNextMonth = document.getElementById('btnNextMonth');
+
+        const nombresMeses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        
+        let currentDate = new Date(); 
+        let selectedDay = null;
+        let selectedMonth = null;
+
+        function renderCalendar(date) {
+            calendarGrid.innerHTML = ''; 
+
+            const year = date.getFullYear();
+            const month = date.getMonth();
+
+            currentMonthYearDisplay.innerHTML = `${nombresMeses[month]} &nbsp;&nbsp; ${year}`;
+
+            const daysOfWeek = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'];
+            daysOfWeek.forEach(day => {
+                calendarGrid.innerHTML += `<div class="dp-day-name">${day}</div>`;
+            });
+
+            let firstDay = new Date(year, month, 1).getDay();
+            firstDay = firstDay === 0 ? 6 : firstDay - 1;
+
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const daysInPrevMonth = new Date(year, month, 0).getDate();
+            
+            for (let i = firstDay - 1; i >= 0; i--) {
+                calendarGrid.innerHTML += `<div class="dp-day disabled">${daysInPrevMonth - i}</div>`;
+            }
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                let isSelectedClass = (i === selectedDay && month === selectedMonth) ? 'selected' : '';
+                calendarGrid.innerHTML += `<div class="dp-day current-month-day ${isSelectedClass}" data-day="${i}">${i}</div>`;
+            }
+
+            const totalCellsSoFar = firstDay + daysInMonth;
+            const remainingCells = 42 - totalCellsSoFar;
+            for (let i = 1; i <= remainingCells; i++) {
+                calendarGrid.innerHTML += `<div class="dp-day disabled">${i}</div>`;
+            }
+
+            const validDays = document.querySelectorAll('.current-month-day');
+            validDays.forEach(dayElem => {
+                dayElem.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    
+                    selectedDay = parseInt(this.getAttribute('data-day'));
+                    selectedMonth = month;
+
+                    let dd = selectedDay.toString().padStart(2, '0');
+                    let mm = (selectedMonth + 1).toString().padStart(2, '0');
+                    fechaInput.value = `${dd}/${mm}`;
+
+                    datePicker.classList.remove('active');
+                    validarFormulario();
+                    renderCalendar(currentDate); 
+                });
+            });
+        }
+
+        btnPrevMonth.addEventListener('click', (e) => {
+            e.stopPropagation();
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar(currentDate);
+        });
+
+        btnNextMonth.addEventListener('click', (e) => {
+            e.stopPropagation();
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar(currentDate);
+        });
+
+        fechaInput.addEventListener('click', function(e) {
+            e.stopPropagation();
+            datePicker.classList.toggle('active');
+            renderCalendar(currentDate); 
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!document.getElementById('dateContainer').contains(e.target)) {
+                datePicker.classList.remove('active');
+            }
+        });
+
+
+        // --- 4. LÓGICA DE VALIDACIÓN DEL FORMULARIO ---
+        const formInputs = document.querySelectorAll('.form-req');
+        const btnSiguienteForm = document.getElementById('btnSiguienteForm');
+        const montoInput = document.getElementById('montoInput');
+
+        montoInput.addEventListener('blur', function() {
+            if (this.value && !isNaN(this.value) && this.value > 0) {
+                this.value = parseFloat(this.value).toFixed(2);
+            }
+            validarFormulario();
+        });
+
+        formInputs.forEach(input => {
+            input.addEventListener('input', validarFormulario);
+        });
+
+        function validarFormulario() {
+            let completo = true;
+            formInputs.forEach(input => {
+                if (input.value.trim() === '') completo = false;
+            });
+
+            if (completo && parseFloat(montoInput.value) > 0) {
+                btnSiguienteForm.classList.add('active');
+            } else {
+                btnSiguienteForm.classList.remove('active');
+            }
+        }
+
+        function irCuentas() {
+            if (btnSiguienteForm.classList.contains('active')) {
+                cargarCuentasCargo();
+                cambiarVistaActiva('view-form', 'view-cuentas');
+            }
+        }
+
+        // --- 5. LÓGICA DE LISTA DE CUENTAS ---
+        function cargarCuentasCargo() {
+            const listContainer = document.getElementById('accountsListContainer');
+            listContainer.innerHTML = ''; 
+
+            for (let i = 1; i <= 3; i++) {
+                let savedName = localStorage.getItem(`ibk_acc${i}_name`) || DEFAULTS[i-1].name;
+                let savedCurr = localStorage.getItem(`ibk_acc${i}_curr`) || DEFAULTS[i-1].curr;
+                let savedBal = localStorage.getItem(`ibk_acc${i}_bal`) || DEFAULTS[i-1].bal;
+                let savedNum = localStorage.getItem(`ibk_acc${i}_num`) || DEFAULTS[i-1].num;
+
+                let formattedBal = parseFloat(savedBal).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+                let cardHTML = `
+                    <div class="account-card" onclick="seleccionarCuenta(${i}, '${savedName}', '${savedNum}', '${savedCurr}')">
+                        <img src="img/target.jpg" alt="Icono Cuenta" class="acc-icon">
+                        <div class="acc-details">
+                            <div class="acc-name">${savedName}</div>
+                            <div class="acc-balance">${savedCurr} ${formattedBal}</div>
+                        </div>
+                        <div class="arrow-right">›</div>
+                    </div>
+                `;
+                listContainer.insertAdjacentHTML('beforeend', cardHTML);
+            }
+        }
+
+        // --- 6. PASAR A CONFIRMACIÓN ---
+        function seleccionarCuenta(accId, accName, accNum, accCurr) {
+            
+            // GUARDAMOS EL ID EN LA VARIABLE GLOBAL
+            cuentaSeleccionadaId = accId;
+
+            const empresa = document.getElementById('empresaInput').value.trim();
+            const servicio = document.getElementById('servicioInput').value.trim();
+            const titular = document.getElementById('titularInput').value.trim();
+            const codigo = document.getElementById('codigoInput').value.trim();
+            const monto = parseFloat(montoInput.value).toFixed(2);
+
+            document.getElementById('confEmpresa').innerText = empresa;
+            document.getElementById('confServicio').innerText = servicio;
+            
+            document.getElementById('confCargoNombre').innerText = accName;
+            document.getElementById('confCargoNum').innerText = accNum; 
+
+            document.getElementById('confTitular').innerText = titular;
+            document.getElementById('confCodigo').innerText = codigo;
+
+            document.getElementById('confMontoFinal').innerText = `${accCurr} ${monto}`; 
+            
+            localStorage.setItem('ibk_serv_currency', accCurr);
+
+            cambiarVistaActiva('view-cuentas', 'view-confirmacion');
+        }
+
+        // --- 7. PROCESAR PAGO Y RESTAR SALDO ---
+        function procesarPagoServicio() {
+            // Guardamos los datos visuales
+            localStorage.setItem('ibk_serv_empresa', document.getElementById('confEmpresa').innerText);
+            localStorage.setItem('ibk_serv_servicio', document.getElementById('confServicio').innerText);
+            localStorage.setItem('ibk_serv_cargo_name', document.getElementById('confCargoNombre').innerText);
+            localStorage.setItem('ibk_serv_cargo_num', document.getElementById('confCargoNum').innerText);
+            localStorage.setItem('ibk_serv_titular', document.getElementById('confTitular').innerText);
+            localStorage.setItem('ibk_serv_codigo', document.getElementById('confCodigo').innerText);
+            localStorage.setItem('ibk_serv_fecha', document.getElementById('fechaInput').value); 
+            
+            // Sacamos el monto que vamos a cobrar
+            const montoTexto = document.getElementById('confMontoFinal').innerText;
+            const montoARestar = parseFloat(montoTexto.replace(/[^\d.]/g, '')); 
+            localStorage.setItem('ibk_serv_monto', montoARestar.toFixed(2));
+
+            // ------ LÓGICA DE CONSUMO DE SALDO ------
+            if (cuentaSeleccionadaId !== null) {
+                // 1. Leer el saldo actual de ESA cuenta específica
+                let saldoActual = localStorage.getItem(`ibk_acc${cuentaSeleccionadaId}_bal`);
+                
+                // Si no existía, tomamos el default para hacer la resta
+                if (!saldoActual) {
+                    saldoActual = DEFAULTS[cuentaSeleccionadaId - 1].bal;
+                }
+                
+                // 2. Restar el dinero
+                let nuevoSaldo = parseFloat(saldoActual) - montoARestar;
+                
+                // 3. Sobrescribir la memoria con el nuevo saldo
+                localStorage.setItem(`ibk_acc${cuentaSeleccionadaId}_bal`, nuevoSaldo.toFixed(2));
+            }
+            // ----------------------------------------
+
+            // Mostrar pantalla de carga
+            document.getElementById('loading-overlay').style.display = 'flex';
+
+            // Redirigir
+            setTimeout(() => {
+                window.location.href = 'exitoserv.html';
+            }, 2000);
+        }
+
+    </script>
+</body>
+</html>
