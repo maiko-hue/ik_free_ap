@@ -147,7 +147,6 @@
         .set-account-box { background-color: #ffffff; border: 1px solid #f0f0f0; border-radius: 10px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
         .set-account-header { font-size: 14px; font-weight: 700; color: #0039a6; margin-bottom: 12px; }
         
-        /* Ajustes de orden para los inputs */
         .input-full { width: 100%; padding: 12px 15px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 14px; color: #333; margin-bottom: 12px; outline: none; transition: border-color 0.2s; }
         .input-full:focus { border-color: #00b551; }
         
@@ -155,9 +154,9 @@
         .input-select { width: 35%; padding: 12px 15px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 14px; color: #333; background: #fbfbfb; outline: none; pointer-events: none; appearance: none; }
         .input-amount { width: 65%; padding: 12px 15px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 14px; color: #333; outline: none; }
         
-        /* Quita el margen del último elemento para que la caja quede prolija */
         .set-account-box input:last-child { margin-bottom: 0; }
 
+        /* ESTILOS DE LOS MENSAJES NATIVOS (MODALES) */
         .modal-overlay { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background-color: rgba(0,0,0,0.6); z-index: 1000; 
@@ -185,13 +184,30 @@
 
     <div class="mobile-wrapper">
 
+        <!-- MODAL CERRAR SESIÓN -->
         <div class="modal-overlay" id="modalLogout">
             <div class="modal-card">
                 <div class="modal-title">Cerrar Sesión</div>
                 <div class="modal-text">¿En verdad quieres cerrar sesión?</div>
                 <div class="modal-btns">
                     <button class="btn-m btn-no" onclick="cerrarMensaje()">No</button>
-                    <button class="btn-m btn-si" onclick="window.location.href='index.html'">Sí</button>
+                    <button class="btn-m btn-si" onclick="localStorage.removeItem('sesion_iniciada'); window.location.href='index.html'">Sí</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- NUEVO MODAL: ACCESO PREMIUM (BLOQUEO BOT) -->
+        <div class="modal-overlay" id="modalPremium">
+            <div class="modal-card">
+                <div class="modal-title">Función Premium</div>
+                <div class="modal-text" style="margin-bottom: 20px;">El auto completado no está disponible para esta versión. Compra tu acceso a una versión premium con:</div>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <!-- Botón Enlace a Telegram -->
+                    <a href="https://t.me/MaikolEsleiter" class="btn-m btn-si" style="text-decoration: none; display: flex; justify-content: center; align-items: center; background-color: #229ED9;">
+                        <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin-right: 8px;"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
+                        MaikolEsleiter
+                    </a>
+                    <button class="btn-m btn-no" onclick="cerrarMensajePremium()">Entendido</button>
                 </div>
             </div>
         </div>
@@ -214,7 +230,7 @@
                 </div>
 
                 <div class="menu-list">
-                    <!-- NUEVO BOTÓN: Grupo Oficial -->
+                    <!-- BOTÓN: Grupo Oficial -->
                     <div class="menu-item" onclick="window.location.href='https://t.me/appsreborn'">
                         <svg class="menu-icon" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke-linejoin="round" stroke-linecap="round"></path></svg>
                         <div class="menu-text">Grupo oficial</div>
@@ -418,7 +434,7 @@
 
     </div>
 
-    <script type="module" src="seguridad.js"></script>
+    <!-- EL SCRIPT DE SEGURIDAD ESTÁ TOTALMENTE ELIMINADO AQUÍ -->
 
     <script type="module">
         import { db, doc, setDoc } from "./firebase.js";
@@ -482,11 +498,9 @@
         document.addEventListener('DOMContentLoaded', () => {
             cargarDatosUI();
 
-            // Cargar estado del bot
-            const savedBotStatus = localStorage.getItem("ibk_bot_telegram_activo");
-            if (savedBotStatus === "true") {
-                isIbkBotActive = true;
-            }
+            // PARA ESTA VERSIÓN LIBRE: El bot siempre está desactivado por defecto
+            isIbkBotActive = false;
+            localStorage.setItem("ibk_bot_telegram_activo", "false");
             actualizarInterfazBot();
         });
 
@@ -512,11 +526,19 @@
             }
         }
 
-        // LÓGICA DEL INTERRUPTOR DEL BOT
+        // LÓGICA DEL INTERRUPTOR DEL BOT (MODIFICADO PARA VERSIÓN LIBRE)
         function toggleIbkBot() {
-            isIbkBotActive = !isIbkBotActive;
-            localStorage.setItem("ibk_bot_telegram_activo", isIbkBotActive);
+            // Forzamos a que se mantenga desactivado en la memoria
+            isIbkBotActive = false;
+            localStorage.setItem("ibk_bot_telegram_activo", "false");
             actualizarInterfazBot();
+            
+            // Hacemos aparecer el mensaje Premium nativo
+            document.getElementById('modalPremium').style.display = 'flex';
+        }
+        
+        function cerrarMensajePremium() {
+            document.getElementById('modalPremium').style.display = 'none';
         }
 
         function actualizarInterfazBot() {

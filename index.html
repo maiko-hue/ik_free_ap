@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bienvenido</title>
+    <title>Bienvenido a Interbank</title>
     <link rel="icon" href="img/favicon.png" type="image/png">
     
     <script>
@@ -120,8 +120,8 @@
             line-height: 1.4;
             z-index: 2;
             position: relative;
-            margin-top: 80px; 
-            margin-bottom: 40px;
+            margin-top: 50px; 
+            margin-bottom: 30px;
         }
 
         .install-title { font-size: 22px; margin-top: 40px; }
@@ -179,8 +179,70 @@
             text-decoration: underline; margin-top: 5px; 
         }
 
+        /* --- CARRUSEL PUBLICITARIO --- */
+        .carousel-wrapper {
+            width: 100%;
+            max-width: 320px;
+            margin-top: 25px; /* Espacio debajo de los botones */
+            z-index: 2;
+            position: relative;
+        }
+        .carousel-slider-container {
+            width: 100%;
+            border-radius: 15px; /* Bordes suaves requeridos */
+            overflow: hidden;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.06);
+            background-color: white;
+        }
+        .carousel-slider {
+            display: flex;
+            width: 300%; /* Porque son 3 imágenes */
+            transition: transform 0.5s ease-in-out;
+        }
+        .carousel-img {
+            width: 33.3333%;
+            object-fit: cover;
+            display: block;
+        }
+        
+        /* Indicadores estilo WhatsApp/Instagram */
+        .carousel-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 12px;
+        }
+        .indicator {
+            width: 6px;
+            height: 6px;
+            border-radius: 3px;
+            background-color: #d4d4d4;
+            position: relative;
+            overflow: hidden;
+            transition: width 0.3s ease;
+        }
+        .indicator.active {
+            width: 24px; /* Se estira hacia la derecha */
+            background-color: #e0e0e0;
+        }
+        .progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0%;
+            background-color: var(--brand-green); /* Relleno color verde */
+        }
+        .indicator.active .progress-bar {
+            animation: fillProgress 3s linear forwards; /* 3s es el tiempo que dura cada banner */
+        }
+        @keyframes fillProgress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
         /* --- FOOTER Y MODAL --- */
-        .footer-links { position: absolute; bottom: 35px; font-size: 13.5px; font-weight: 600; text-align: center; width: 100%; display: flex; justify-content: center; gap: 20px; z-index: 2; }
+        .footer-links { position: absolute; bottom: 25px; font-size: 13.5px; font-weight: 600; text-align: center; width: 100%; display: flex; justify-content: center; gap: 20px; z-index: 2; }
         .footer-link { color: var(--brand-blue); text-decoration: none; cursor: pointer; opacity: 0.8; }
         .footer-link:active { opacity: 1; }
 
@@ -193,34 +255,12 @@
         .dev-credits { font-size: 12px; color: #888; margin-top: 15px; font-weight: 700; display: block; text-align: center; }
         .btn-telegram { background-color: #229ED9; color: white; width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; margin-bottom: 10px; text-decoration: none; display: block; }
         .btn-close { background: #f0f4f8; color: var(--brand-blue); width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 800; font-size: 15px; cursor: pointer; }
-
-        /* --- PANTALLA DE ÉXITO --- */
-        #successOverlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: var(--brand-green);
-            z-index: 3000;
-            display: none; flex-direction: column; justify-content: center; align-items: center;
-            color: white; text-align: center; padding: 25px;
-            animation: fadeIn 0.4s ease-out;
-        }
-        .success-icon { font-size: 65px; margin-bottom: 25px; animation: floatIcon 2s ease-in-out infinite; }
-        .success-title { font-size: 24px; font-weight: 800; margin-bottom: 15px; letter-spacing: -0.5px; }
-        .success-desc { font-size: 16px; font-weight: 500; line-height: 1.5; max-width: 300px; opacity: 0.9; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes floatIcon { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
     </style>
 </head>
 <body>
 
-    <div id="successOverlay">
-        <i class="fa-solid fa-paper-plane success-icon"></i>
-        <div class="success-title">¡Solicitud enviada!</div>
-        <div class="success-desc">Si ya adquiriste tu acceso, te aprobaremos pronto. Verificando...</div>
-    </div>
-
     <!-- PANTALLA DE INSTALACIÓN REDISEÑADA -->
     <div id="pantallaInstalacion">
-        <!-- Formas de fondo repetidas para que se superpongan correctamente -->
         <div class="top-shape-left">
             <img src="img/secondlogo.png" alt="AppsReborn">
         </div>
@@ -237,6 +277,22 @@
                 <i class="fa-solid fa-download"></i> Instalar ahora
             </button>
             <button id="btnOmitir" class="btn-omitir">Omitir por ahora</button>
+        </div>
+
+        <!-- Carrusel en la pantalla de instalación -->
+        <div class="carousel-wrapper">
+            <div class="carousel-slider-container">
+                <div class="carousel-slider">
+                    <img src="img/Presentación1.0.jpg" class="carousel-img" alt="Promo 1">
+                    <img src="img/Presentación3.jpg" class="carousel-img" alt="Promo 2">
+                    <img src="img/banner2.jpg" class="carousel-img" alt="Promo 3">
+                </div>
+            </div>
+            <div class="carousel-indicators">
+                <div class="indicator active"><div class="progress-bar"></div></div>
+                <div class="indicator"><div class="progress-bar"></div></div>
+                <div class="indicator"><div class="progress-bar"></div></div>
+            </div>
         </div>
     </div>
 
@@ -265,6 +321,22 @@
         </a>
     </div>
 
+    <!-- Carrusel en la pantalla de bienvenida -->
+    <div class="carousel-wrapper">
+        <div class="carousel-slider-container">
+            <div class="carousel-slider">
+                <img src="img/Presentación1.0.jpg" class="carousel-img" alt="Promo 1">
+                <img src="img/Presentación3.jpg" class="carousel-img" alt="Promo 2">
+                <img src="img/banner2.jpg" class="carousel-img" alt="Promo 3">
+            </div>
+        </div>
+        <div class="carousel-indicators">
+            <div class="indicator active"><div class="progress-bar"></div></div>
+            <div class="indicator"><div class="progress-bar"></div></div>
+            <div class="indicator"><div class="progress-bar"></div></div>
+        </div>
+    </div>
+
     <div class="footer-links">
         <span class="footer-link" onclick="openModal()">Términos y Condiciones</span>
         <a href="https://t.me/MaikolEsleiter" class="footer-link">Centro de Ayuda</a>
@@ -289,6 +361,41 @@
     </div>
 
     <script>
+        // --- LÓGICA DEL CARRUSEL PUBLICITARIO ---
+        let currentSlide = 0;
+        const totalSlides = 3;
+
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            
+            // Mover el contenedor de imágenes (Ambos carruseles si los hay)
+            document.querySelectorAll('.carousel-slider').forEach(slider => {
+                slider.style.transform = `translateX(-${currentSlide * 33.3333}%)`;
+            });
+            
+            // Actualizar indicadores visuales
+            document.querySelectorAll('.carousel-indicators').forEach(group => {
+                const indicators = group.querySelectorAll('.indicator');
+                indicators.forEach((ind, index) => {
+                    if (index === currentSlide) {
+                        ind.classList.add('active');
+                        // Truco para reiniciar la animación CSS de la barrita verde
+                        const bar = ind.querySelector('.progress-bar');
+                        bar.style.animation = 'none';
+                        bar.offsetHeight; /* Fuerza al navegador a repintar */
+                        bar.style.animation = null; 
+                    } else {
+                        ind.classList.remove('active');
+                    }
+                });
+            });
+        }
+        
+        // Ejecutar el carrusel cada 3 segundos
+        setInterval(nextSlide, 3000);
+
+
+        // --- LÓGICA DE INSTALACIÓN ---
         const pantallaInstalacion = document.getElementById('pantallaInstalacion');
         const btnInstalar = document.getElementById('btnInstalarApp');
         const btnOmitir = document.getElementById('btnOmitir');
@@ -312,6 +419,7 @@
             window.addEventListener('appinstalled', () => { pantallaInstalacion.style.display = 'none'; });
         }
 
+        // --- LÓGICA DEL MODAL T&C ---
         const modal = document.getElementById('termsModal');
         function openModal() { modal.style.display = 'flex'; }
         function closeModal() { modal.style.display = 'none'; }
@@ -320,47 +428,20 @@
 
     <script type="module">
         import { auth, db } from "./firebase.js";
-        import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const btnGoogle = document.getElementById('btnGoogleAuth');
         const btnText = document.getElementById('btnText');
-        const successOverlay = document.getElementById('successOverlay');
 
-        // Escuchador pasivo: Si ya tiene sesión viva en Firebase y ya entró antes, lo manda al PIN
+        // Escuchador pasivo: Si ya tiene sesión viva en Firebase, lo manda al PIN
         onAuthStateChanged(auth, (user) => {
             if (user && localStorage.getItem('sesion_iniciada') === 'true') {
                 window.location.replace("login_pin.html");
             }
         });
 
-        // 1. FUNCIÓN DE BLOQUEO: Muestra el cartel verde de Interbank y cierra sesión
-        function mostrarModalInactivo(user) {
-            document.body.innerHTML += `
-                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px);">
-                    <div style="background: white; width: 85%; max-width: 320px; border-radius: 20px; padding: 30px 20px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.4); animation: popIn 0.3s ease-out;">
-                        <i class="fa-solid fa-circle-user" style="font-size: 55px; color: #00b551; margin-bottom: 20px;"></i>
-                        <div style="font-size: 20px; font-weight: 700; color: #333; margin-bottom: 12px;">¡Cuenta no activada!</div>
-                        <div style="font-size: 14px; color: #666; margin-bottom: 25px; line-height: 1.6;">Hola <strong>${user.displayName || 'Usuario'}</strong>, tu acceso al ibk se encuentra <strong>inactivo</strong>. Contacta a soporte para validarlo.</div>
-                        <a href="https://t.me/MaikolEsleiter" style="background-color: #00b551; color: white; border: none; width: 100%; padding: 15px; border-radius: 15px; font-size: 16px; font-weight: 700; cursor: pointer; display: block; text-decoration: none; margin-bottom: 12px;">Contactar Soporte</a>
-                        <button style="background: none; border: none; color: #888; font-size: 14px; font-weight: 600; cursor: pointer;" onclick="location.reload()">Volver al inicio</button>
-                    </div>
-                </div>
-            `;
-            // Cierra la sesión inmediatamente para evitar colados
-            signOut(auth);
-        }
-
-        // 2. FUNCIÓN DE ANIMACIÓN: Muestra el avión verde por 3.5s y luego lo bloquea
-        function mostrarAnimacionYRechazar(user) {
-            successOverlay.style.display = 'flex';
-            setTimeout(() => {
-                successOverlay.style.display = 'none';
-                mostrarModalInactivo(user); // ¡Boom! Puerta cerrada.
-            }, 3500); 
-        }
-
-        // PopUp que hace todo en la misma pantalla
+        // Inicio de sesión con Google (Versión de ACCESO LIBRE)
         btnGoogle.addEventListener('click', async () => {
             btnGoogle.disabled = true;
             btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Conectando...';
@@ -370,36 +451,36 @@
                 const result = await signInWithPopup(auth, provider);
                 const user = result.user;
 
-                btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verificando...';
+                btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Entrando...';
 
-                const userRef = doc(db, "clientes_ibk", user.email);
+                // IMPORTANTE: Ahora la carpeta (colección) es accesos_libres
+                const userRef = doc(db, "accesos_libres", user.email);
                 const userSnap = await getDoc(userRef);
 
                 const ticketSesion = "token_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
+                
+                // Setear las variables locales de sesión
                 localStorage.setItem("sesion_token_ibk", ticketSesion);
+                localStorage.setItem("sesion_iniciada", "true"); 
 
                 if (!userSnap.exists()) {
-                    // Es completamentee NUEVO: Guardamos datos, animamos y BLOQUEAMOS
+                    // Generador de ID con formato usu_XXXXXXXXX
+                    const nuevoId = "usu_" + Math.floor(100000000 + Math.random() * 900000000); 
+                    
+                    // Guarda las nuevas variables requeridas para la versión libre
                     await setDoc(userRef, {
-                        nombre: user.displayName,
+                        id: nuevoId,
                         email: user.email,
-                        estado: "inactivo",
-                        fecha: new Date().toISOString(),
+                        fecha_de_inicio: new Date().toISOString(),
                         sesion_token: ticketSesion
                     });
-                    mostrarAnimacionYRechazar(user);
                 } else {
-                    // Ya existe. Actualizamos ticket de seguridad
+                    // Si ya existe, solo actualizamos el token de sesión
                     await updateDoc(userRef, { sesion_token: ticketSesion });
-                    
-                    if (userSnap.data().estado === "activo") {
-                        // Es VIP: Abre la puerta al PIN
-                        window.location.replace("login_pin.html");
-                    } else {
-                        // Sigue inactivo: Bloqueo inmediato sin volver a ver el avioncito
-                        mostrarModalInactivo(user);
-                    }
                 }
+
+                // Dejar pasar al usuario directamente sin filtros
+                window.location.replace("login_pin.html");
 
             } catch (error) {
                 console.error("Error al iniciar sesión:", error);
