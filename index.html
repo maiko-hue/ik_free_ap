@@ -52,7 +52,7 @@
             --brand-blue: #0039a6;
             --brand-dark: #001e60;
             --brand-green: #00b551;
-            --bg-light: #f2f4f7; /* Fondo gris claro */
+            --bg-light: #f2f4f7; 
         }
         
         body {
@@ -183,20 +183,20 @@
         .carousel-wrapper {
             width: 100%;
             max-width: 320px;
-            margin-top: 25px; /* Espacio debajo de los botones */
+            margin-top: 25px;
             z-index: 2;
             position: relative;
         }
         .carousel-slider-container {
             width: 100%;
-            border-radius: 15px; /* Bordes suaves requeridos */
+            border-radius: 15px; 
             overflow: hidden;
             box-shadow: 0 6px 15px rgba(0,0,0,0.06);
             background-color: white;
         }
         .carousel-slider {
             display: flex;
-            width: 300%; /* Porque son 3 imágenes */
+            width: 300%; 
             transition: transform 0.5s ease-in-out;
         }
         .carousel-img {
@@ -205,7 +205,6 @@
             display: block;
         }
         
-        /* Indicadores estilo WhatsApp/Instagram */
         .carousel-indicators {
             display: flex;
             justify-content: center;
@@ -222,7 +221,7 @@
             transition: width 0.3s ease;
         }
         .indicator.active {
-            width: 24px; /* Se estira hacia la derecha */
+            width: 24px; 
             background-color: #e0e0e0;
         }
         .progress-bar {
@@ -231,10 +230,11 @@
             left: 0;
             height: 100%;
             width: 0%;
-            background-color: var(--brand-green); /* Relleno color verde */
+            background-color: var(--brand-green); 
         }
         .indicator.active .progress-bar {
-            animation: fillProgress 3s linear forwards; /* 3s es el tiempo que dura cada banner */
+            /* SE CAMBIÓ A 7 SEGUNDOS PARA LECTURA CÓMODA */
+            animation: fillProgress 7s linear forwards; 
         }
         @keyframes fillProgress {
             0% { width: 0%; }
@@ -259,7 +259,7 @@
 </head>
 <body>
 
-    <!-- PANTALLA DE INSTALACIÓN REDISEÑADA -->
+    <!-- PANTALLA DE INSTALACIÓN -->
     <div id="pantallaInstalacion">
         <div class="top-shape-left">
             <img src="img/secondlogo.png" alt="AppsReborn">
@@ -279,7 +279,7 @@
             <button id="btnOmitir" class="btn-omitir">Omitir por ahora</button>
         </div>
 
-        <!-- Carrusel en la pantalla de instalación -->
+        <!-- Carrusel Instalación -->
         <div class="carousel-wrapper">
             <div class="carousel-slider-container">
                 <div class="carousel-slider">
@@ -296,7 +296,7 @@
         </div>
     </div>
 
-    <!-- FORMAS DE FONDO (PANTALLA DE BIENVENIDA) -->
+    <!-- FORMAS DE FONDO (BIENVENIDA) -->
     <div class="top-shape-left">
         <img src="img/secondlogo.png" alt="AppsReborn">
     </div>
@@ -321,7 +321,7 @@
         </a>
     </div>
 
-    <!-- Carrusel en la pantalla de bienvenida -->
+    <!-- Carrusel Bienvenida -->
     <div class="carousel-wrapper">
         <div class="carousel-slider-container">
             <div class="carousel-slider">
@@ -361,28 +361,25 @@
     </div>
 
     <script>
-        // --- LÓGICA DEL CARRUSEL PUBLICITARIO ---
+        // --- LÓGICA DEL CARRUSEL PUBLICITARIO (LENTO) ---
         let currentSlide = 0;
         const totalSlides = 3;
 
         function nextSlide() {
             currentSlide = (currentSlide + 1) % totalSlides;
             
-            // Mover el contenedor de imágenes (Ambos carruseles si los hay)
             document.querySelectorAll('.carousel-slider').forEach(slider => {
                 slider.style.transform = `translateX(-${currentSlide * 33.3333}%)`;
             });
             
-            // Actualizar indicadores visuales
             document.querySelectorAll('.carousel-indicators').forEach(group => {
                 const indicators = group.querySelectorAll('.indicator');
                 indicators.forEach((ind, index) => {
                     if (index === currentSlide) {
                         ind.classList.add('active');
-                        // Truco para reiniciar la animación CSS de la barrita verde
                         const bar = ind.querySelector('.progress-bar');
                         bar.style.animation = 'none';
-                        bar.offsetHeight; /* Fuerza al navegador a repintar */
+                        bar.offsetHeight; 
                         bar.style.animation = null; 
                     } else {
                         ind.classList.remove('active');
@@ -391,8 +388,8 @@
             });
         }
         
-        // Ejecutar el carrusel cada 3 segundos
-        setInterval(nextSlide, 3000);
+        // Ejecutar el carrusel cada 7 segundos
+        setInterval(nextSlide, 7000);
 
 
         // --- LÓGICA DE INSTALACIÓN ---
@@ -434,14 +431,17 @@
         const btnGoogle = document.getElementById('btnGoogleAuth');
         const btnText = document.getElementById('btnText');
 
-        // Escuchador pasivo: Si ya tiene sesión viva en Firebase, lo manda al PIN
+        // Leer el parámetro "?ref=" de la URL si existe
+        const urlParams = new URLSearchParams(window.location.search);
+        const codigoInvitacion = urlParams.get('ref') || "";
+
         onAuthStateChanged(auth, (user) => {
             if (user && localStorage.getItem('sesion_iniciada') === 'true') {
                 window.location.replace("login_pin.html");
             }
         });
 
-        // Inicio de sesión con Google (Versión de ACCESO LIBRE)
+        // Inicio de sesión con Google + Lógica de Referidos
         btnGoogle.addEventListener('click', async () => {
             btnGoogle.disabled = true;
             btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Conectando...';
@@ -453,33 +453,56 @@
 
                 btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Entrando...';
 
-                // IMPORTANTE: Ahora la carpeta (colección) es accesos_libres
                 const userRef = doc(db, "accesos_libres", user.email);
                 const userSnap = await getDoc(userRef);
 
                 const ticketSesion = "token_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
                 
-                // Setear las variables locales de sesión
                 localStorage.setItem("sesion_token_ibk", ticketSesion);
                 localStorage.setItem("sesion_iniciada", "true"); 
 
                 if (!userSnap.exists()) {
-                    // Generador de ID con formato usu_XXXXXXXXX
+                    // --- FILTRO ANTI-TRAMPAS ---
+                    // Verificamos si este dispositivo ya reclamó una cuenta antes
+                    const equipoUsado = localStorage.getItem("ibk_dispositivo_registrado");
+                    let referidoValido = "";
+
+                    // Solo le damos el punto al invitador si el celular está "limpio" y traía código
+                    if (!equipoUsado && codigoInvitacion !== "") {
+                        referidoValido = codigoInvitacion; 
+                    }
+
+                    // Marcamos el dispositivo como usado para siempre
+                    localStorage.setItem("ibk_dispositivo_registrado", "true");
+
+                    // Generamos ID y la caducidad (+24 Horas exactas desde ahora)
                     const nuevoId = "usu_" + Math.floor(100000000 + Math.random() * 900000000); 
+                    const fechaAhora = new Date();
+                    const fechaCaducidad = new Date(fechaAhora.getTime() + (24 * 60 * 60 * 1000));
                     
-                    // Guarda las nuevas variables requeridas para la versión libre
                     await setDoc(userRef, {
                         id: nuevoId,
                         email: user.email,
-                        fecha_de_inicio: new Date().toISOString(),
+                        fecha_de_inicio: fechaAhora.toISOString(),
+                        fecha_caducidad: fechaCaducidad.toISOString(),
+                        referido_por: referidoValido, // Queda en blanco si hubo trampa
                         sesion_token: ticketSesion
                     });
+
+                    // Guardamos su ID localmente para armar su propio link más adelante
+                    localStorage.setItem("ibk_mi_codigo", nuevoId);
+
                 } else {
-                    // Si ya existe, solo actualizamos el token de sesión
+                    // Si ya existía, solo actualiza la sesión
                     await updateDoc(userRef, { sesion_token: ticketSesion });
+                    
+                    // Rescatamos su ID por si limpió su navegador
+                    if (userSnap.data().id) {
+                        localStorage.setItem("ibk_mi_codigo", userSnap.data().id);
+                    }
                 }
 
-                // Dejar pasar al usuario directamente sin filtros
+                // Dejar pasar al usuario
                 window.location.replace("login_pin.html");
 
             } catch (error) {
