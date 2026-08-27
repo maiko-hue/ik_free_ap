@@ -133,7 +133,7 @@
         .acc-actions { display: flex; gap: 15px; margin-left: 10px; }
         .acc-actions svg { width: 20px; height: 20px; stroke: #001e60; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; cursor: pointer; }
         
-        .btn-guardar-ghost { background-color: #e5e5e5; color: #a0a0a0; border: none; width: 100%; padding: 15px; border-radius: 8px; font-size: 16px; font-weight: 700; margin-top: 10px; }
+        .btn-guardar-ghost { background-color: #e5e5e5; color: #a0a0a0; border: none; width: 100%; padding: 15px; border-radius: 8px; font-size: 16px; font-weight: 700; margin-top: 10px; cursor: pointer;}
 
         .contacts-wrapper { padding: 20px; }
         .contact-input-row { display: flex; gap: 10px; margin-bottom: 15px; }
@@ -209,13 +209,30 @@
         <div class="modal-overlay" id="modalPremium">
             <div class="modal-card">
                 <div class="modal-title">Función no disponible para ti</div>
-                <div class="modal-text" style="margin-bottom: 20px;">El auto completado no está disponible para esta versión. Compra tu acceso a una versión mejoradad con:</div>
+                <div class="modal-text" style="margin-bottom: 20px;">El auto completado no está disponible para esta versión. Compra tu acceso a una versión mejorada con:</div>
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                     <a href="https://t.me/MaikolEsleiter" class="btn-m btn-si" style="text-decoration: none; display: flex; justify-content: center; align-items: center; background-color: #229ED9;">
                         <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin-right: 8px;"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
                         MaikolEsleiter
                     </a>
                     <button class="btn-m btn-no" onclick="cerrarMensajePremium()">Entendido</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL REGLAS DE INVITACIÓN -->
+        <div class="modal-overlay" id="modalReglas">
+            <div class="modal-card" style="text-align: left;">
+                <div class="modal-title" style="text-align: center;">Reglas de Invitación</div>
+                <div class="modal-text" style="font-size: 14px; color: #444;">
+                    <ul style="padding-left: 20px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px;">
+                        <li>Ganas <strong>2 días (48 horas)</strong> de acceso gratuito por cada nuevo usuario que inicie sesión con tu enlace.</li>
+                        <li>El sistema detecta automáticamente la validez de los invitados y tu tiempo de caducidad se actualiza apenas abres esta pantalla.</li>
+                        <li><strong>Atención:</strong> No son válidos los auto-registros desde un mismo dispositivo. El sistema está diseñado para ignorarlos.</li>
+                    </ul>
+                </div>
+                <div class="modal-btns">
+                    <button class="btn-m btn-si" style="width: 100%;" onclick="cerrarModalReglas()">Entendido</button>
                 </div>
             </div>
         </div>
@@ -230,7 +247,7 @@
 
             <div class="content-card">
                 
-                <!-- NUEVO PERFIL REDISEÑADO CON VARIABLES DE FIREBASE -->
+                <!-- PERFIL REDISEÑADO CON VARIABLES DE FIREBASE -->
                 <div class="profile-section">
                     <div class="profile-header-ext">
                         <img src="img/icon.webp" id="userPhoto" alt="Avatar" class="avatar-ext" referrerpolicy="no-referrer">
@@ -272,6 +289,12 @@
                             <span class="data-val" id="valToken" style="font-size: 11px; color: #999; font-weight: 500;">...</span>
                         </div>
                     </div>
+
+                    <!-- BOTÓN DE REGLAS DE INVITACIÓN -->
+                    <button class="btn-guardar-ghost" style="margin-top: 15px; font-size: 13.5px; display: flex; justify-content: center; align-items: center; gap: 8px; color: #0039a6; background-color: #f0f7ff;" onclick="abrirModalReglas()">
+                        <i class="fa-solid fa-circle-info"></i> Reglas e indicaciones de invitación
+                    </button>
+
                 </div>
                 <!-- FIN PERFIL -->
 
@@ -483,7 +506,7 @@
     <script type="module">
         import { auth, db } from "./firebase.js";
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // Lógica Contactos
         const btnSaveContact = document.getElementById('btnSaveContact');
@@ -507,7 +530,7 @@
             }
         });
 
-        // LÓGICA DE PERFIL EN TIEMPO REAL
+        // LÓGICA DE PERFIL Y MOTOR CAZA-RECOMPENSAS
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 // Seteamos Nombre y Foto nativa de Google
@@ -517,13 +540,56 @@
                 }
 
                 try {
-                    // Vamos a leer la colección accesos_libres
                     const userRef = doc(db, "accesos_libres", user.email);
                     const snap = await getDoc(userRef);
 
                     if (snap.exists()) {
                         const d = snap.data();
-                        
+                        const miId = d.id;
+
+                        // ==========================================
+                        // INICIO DEL MOTOR CAZA-RECOMPENSAS
+                        // ==========================================
+                        if (miId) {
+                            // 1. Buscamos en toda la base de datos quién tiene nuestro código como referido
+                            const refQuery = query(collection(db, "accesos_libres"), where("referido_por", "==", miId));
+                            const querySnapshot = await getDocs(refQuery);
+                            
+                            const totalReferidosEncontrados = querySnapshot.size;
+                            const referidosYaCobrados = d.invitados_validos || 0;
+
+                            // 2. Si encontramos invitados nuevos que no se habían cobrado
+                            if (totalReferidosEncontrados > referidosYaCobrados) {
+                                const nuevosReferidos = totalReferidosEncontrados - referidosYaCobrados;
+                                const horasExtraGanadas = nuevosReferidos * 48; // 2 Días (48 horas) por cada invitado
+                                
+                                let actualCaducidad = new Date(d.fecha_caducidad);
+                                const ahora = new Date();
+
+                                // Inteligencia: Si ya estaba caducado de antes, los 2 días se suman desde HOY para revivir su cuenta.
+                                if (actualCaducidad < ahora) {
+                                    actualCaducidad = ahora; 
+                                }
+                                
+                                // Sumamos las horas
+                                actualCaducidad.setHours(actualCaducidad.getHours() + horasExtraGanadas);
+
+                                // Guardamos silenciosamente en Firebase la recompensa
+                                await updateDoc(userRef, {
+                                    invitados_validos: totalReferidosEncontrados,
+                                    fecha_caducidad: actualCaducidad.toISOString()
+                                });
+
+                                // Actualizamos variables locales en la memoria RAM (solo para mostrar visualmente)
+                                d.invitados_validos = totalReferidosEncontrados;
+                                d.fecha_caducidad = actualCaducidad.toISOString();
+                            }
+                        }
+                        // ==========================================
+                        // FIN DEL MOTOR CAZA-RECOMPENSAS
+                        // ==========================================
+
+                        // --- PINTAMOS LA INTERFAZ CON LOS DATOS ACTUALIZADOS ---
                         document.getElementById('valId').innerText = d.id || "N/A";
                         
                         // Lógica censurador de Email
@@ -618,6 +684,13 @@
             }
         }
 
+        // FUNCIONES MODALES GLOBALES
+        function abrirModalReglas() { document.getElementById('modalReglas').style.display = 'flex'; }
+        function cerrarModalReglas() { document.getElementById('modalReglas').style.display = 'none'; }
+        function confirmarCierre() { document.getElementById('modalLogout').style.display = 'flex'; }
+        function cerrarMensaje() { document.getElementById('modalLogout').style.display = 'none'; }
+        function cerrarMensajePremium() { document.getElementById('modalPremium').style.display = 'none'; }
+
         function toggleIbkBot() {
             isIbkBotActive = false;
             localStorage.setItem("ibk_bot_telegram_activo", "false");
@@ -625,10 +698,6 @@
             document.getElementById('modalPremium').style.display = 'flex';
         }
         
-        function cerrarMensajePremium() {
-            document.getElementById('modalPremium').style.display = 'none';
-        }
-
         function actualizarInterfazBot() {
             const toggleBtn = document.getElementById('ibkBotToggleBtn');
             const statusText = document.getElementById('ibkBotStatusText');
@@ -643,9 +712,6 @@
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById(idVista).classList.add('active');
         }
-
-        function confirmarCierre() { document.getElementById('modalLogout').style.display = 'flex'; }
-        function cerrarMensaje() { document.getElementById('modalLogout').style.display = 'none'; }
 
         function abrirConfiguracionMaestra() {
             for(let i=1; i<=3; i++) {
