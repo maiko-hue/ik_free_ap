@@ -4,7 +4,7 @@
     <link rel="manifest" href="manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Configuración</title>
+    <title>Configuración - Banca Móvil</title>
     <link rel="icon" href="img/favicon.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -107,6 +107,32 @@
         .data-val { font-size: 13.5px; color: #111; font-weight: 700; text-align: right; word-break: break-all; max-width: 60%; }
         /* ------------------------------- */
 
+        /* ==========================================
+           ANIMACIÓN SKELETON (Carga en tiempo real)
+           ========================================== */
+        .skeleton {
+            position: relative;
+            overflow: hidden;
+            background-color: #e2e5e9 !important;
+            color: transparent !important;
+            border-color: transparent !important;
+            border-radius: 6px;
+        }
+        .skeleton::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+            animation: skeleton-shimmer 1.2s infinite;
+        }
+        @keyframes skeleton-shimmer {
+            100% { left: 100%; }
+        }
+        .avatar-ext.skeleton { border-radius: 50%; filter: grayscale(100%) opacity(0.3); }
+
         .menu-list { padding: 15px 20px; display: flex; flex-direction: column; gap: 12px; }
         .menu-item { background-color: #ffffff; border-radius: 10px; padding: 18px 20px; display: flex; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.03); border: 1px solid #f0f0f0; cursor: pointer; text-decoration: none; }
         .menu-item:active { background-color: #f9f9f9; }
@@ -148,20 +174,30 @@
         .info-box svg { width: 20px; height: 20px; stroke: #0039a6; stroke-width: 2; fill: none; flex-shrink: 0; margin-top: 2px; }
         .info-box p { font-size: 13px; color: #0039a6; line-height: 1.4; margin: 0; }
 
-        /* --- VISTA 4: CONFIGURACIÓN MAESTRA --- */
-        .settings-wrapper { padding: 20px; }
-        .settings-section-title { font-size: 14px; font-weight: 800; color: #00b551; text-transform: uppercase; margin-bottom: 15px; margin-top: 20px; letter-spacing: 0.5px; }
+        /* ==========================================
+           REDISEÑO DE CONFIGURACIÓN MAESTRA
+           ========================================== */
+        .settings-wrapper { padding: 25px 20px; }
+        .settings-section-title { font-size: 13.5px; font-weight: 800; color: #00b551; text-transform: uppercase; margin-bottom: 15px; margin-top: 25px; letter-spacing: 0.5px; }
         .settings-section-title:first-child { margin-top: 0; }
         
-        .set-account-box { background-color: #ffffff; border: 1px solid #f0f0f0; border-radius: 10px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
-        .set-account-header { font-size: 14px; font-weight: 700; color: #0039a6; margin-bottom: 12px; }
+        .set-account-box { background-color: #ffffff; border: 1px solid #eef0f5; border-radius: 12px; padding: 20px 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+        .set-account-header { font-size: 14.5px; font-weight: 800; color: #0039a6; margin-bottom: 15px; }
         
-        .input-full { width: 100%; padding: 12px 15px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 14px; color: #333; margin-bottom: 12px; outline: none; transition: border-color 0.2s; }
-        .input-full:focus { border-color: #00b551; }
+        /* Estilos de inputs pulidos y suaves */
+        .input-full, .input-amount, .input-select { 
+            width: 100%; padding: 14px 16px; border: 1.5px solid #eef0f5; border-radius: 10px; 
+            font-size: 15px; color: #333; font-weight: 500; outline: none; transition: all 0.2s ease; 
+            background-color: #fafbfc; font-family: 'Nunito', sans-serif;
+        }
+        .input-full { margin-bottom: 15px; }
+        .input-full:focus, .input-amount:focus, .input-select:focus { 
+            border-color: #00b551; background-color: #fff; box-shadow: 0 0 0 3px rgba(0, 181, 81, 0.1); 
+        }
         
-        .input-row { display: flex; gap: 12px; margin-bottom: 12px; width: 100%; }
-        .input-select { width: 35%; padding: 12px 15px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 14px; color: #333; background: #fbfbfb; outline: none; pointer-events: none; appearance: none; }
-        .input-amount { width: 65%; padding: 12px 15px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 14px; color: #333; outline: none; }
+        .input-row { display: flex; gap: 15px; margin-bottom: 15px; width: 100%; }
+        .input-select { width: 40%; pointer-events: none; appearance: none; color: #666; font-weight: 700; background-color: #f5f6f8; }
+        .input-amount { width: 60%; font-weight: 700; color: #0039a6; }
         
         .set-account-box input:last-child { margin-bottom: 0; }
 
@@ -247,14 +283,15 @@
 
             <div class="content-card">
                 
-                <!-- PERFIL REDISEÑADO CON VARIABLES DE FIREBASE -->
+                <!-- PERFIL REDISEÑADO CON ANIMACIÓN SKELETON -->
                 <div class="profile-section">
                     <div class="profile-header-ext">
-                        <img src="img/icon.webp" id="userPhoto" alt="Avatar" class="avatar-ext" referrerpolicy="no-referrer">
+                        <img src="img/icon.webp" id="userPhoto" alt="Avatar" class="avatar-ext skeleton" referrerpolicy="no-referrer">
                         <div class="user-info-ext">
-                            <div class="user-name" id="userNameDisplay">Cargando...</div>
-                            <button class="btn-copy-link" id="btnCopiarLink">
-                                <i class="fa-solid fa-link"></i> Copiar mi enlace
+                            <div class="user-name skeleton" id="userNameDisplay" style="width: 140px; height: 22px; display: inline-block;"></div>
+                            <br>
+                            <button class="btn-copy-link skeleton" id="btnCopiarLink" style="width: 130px; height: 28px;">
+                                <i class="fa-solid fa-link" style="display:none;" id="iconCopy"></i> <span id="textCopy"></span>
                             </button>
                         </div>
                     </div>
@@ -262,31 +299,31 @@
                     <div class="data-list">
                         <div class="data-row">
                             <span class="data-label">ID Único</span>
-                            <span class="data-val" id="valId" style="color: #0039a6;">...</span>
+                            <span class="data-val skeleton" id="valId" style="color: #0039a6; width: 100px; height: 16px; display: inline-block;"></span>
                         </div>
                         <div class="data-row">
                             <span class="data-label">Email <i class="fa-solid fa-eye-slash" id="toggleEmailBtn" style="cursor:pointer; color:#00b551; margin-left:8px; font-size: 14px;"></i></span>
-                            <span class="data-val" id="valEmail" data-full="" data-censored="">...</span>
+                            <span class="data-val skeleton" id="valEmail" data-full="" data-censored="" style="width: 140px; height: 16px; display: inline-block;"></span>
                         </div>
                         <div class="data-row">
                             <span class="data-label">Fecha de Inicio</span>
-                            <span class="data-val" id="valInicio" style="font-weight: 600; color: #555;">...</span>
+                            <span class="data-val skeleton" id="valInicio" style="font-weight: 600; color: #555; width: 120px; height: 16px; display: inline-block;"></span>
                         </div>
                         <div class="data-row">
                             <span class="data-label">Caducidad</span>
-                            <span class="data-val" id="valCaducidad" style="color: #d32f2f; font-weight: 800;">...</span>
+                            <span class="data-val skeleton" id="valCaducidad" style="color: #d32f2f; font-weight: 800; width: 120px; height: 16px; display: inline-block;"></span>
                         </div>
                         <div class="data-row">
                             <span class="data-label">Referido por</span>
-                            <span class="data-val" id="valReferido" style="color: #666;">...</span>
+                            <span class="data-val skeleton" id="valReferido" style="color: #666; width: 90px; height: 16px; display: inline-block;"></span>
                         </div>
                         <div class="data-row">
                             <span class="data-label">Invitados Válidos</span>
-                            <span class="data-val" id="valInvitados" style="color: #00b551; font-size: 16px; font-weight: 800;">...</span>
+                            <span class="data-val skeleton" id="valInvitados" style="color: #00b551; font-size: 16px; font-weight: 800; width: 30px; height: 18px; display: inline-block;"></span>
                         </div>
                         <div class="data-row" style="border-bottom: none;">
                             <span class="data-label">Sesión Token</span>
-                            <span class="data-val" id="valToken" style="font-size: 11px; color: #999; font-weight: 500;">...</span>
+                            <span class="data-val skeleton" id="valToken" style="font-size: 11px; color: #999; font-weight: 500; width: 150px; height: 14px; display: inline-block;"></span>
                         </div>
                     </div>
 
@@ -461,10 +498,12 @@
                                 <option value="S/" selected>Soles (S/)</option>
                                 <option value="US$">Dólares (US$)</option>
                             </select>
-                            <input type="number" id="setAcc1Bal" class="input-amount" placeholder="0.00" step="0.01">
+                            <!-- FORMATO ATM ACTIVADO -->
+                            <input type="text" inputmode="numeric" id="setAcc1Bal" class="input-amount format-atm" placeholder="0.00">
                         </div>
-                        <input type="tel" id="setAcc1Num" class="input-full" placeholder="Número de cuenta (ej. 191 2058951088)">
-                        <input type="tel" id="setAcc1CCI" class="input-full" placeholder="CCI (ej. 002 191 002058951088 12)">
+                        <!-- FORMATO 4 EN 4 ACTIVADO -->
+                        <input type="text" inputmode="numeric" id="setAcc1Num" class="input-full format-account" placeholder="Número de cuenta">
+                        <input type="text" inputmode="numeric" id="setAcc1CCI" class="input-full format-account" placeholder="CCI">
                     </div>
 
                     <div class="set-account-box">
@@ -475,10 +514,12 @@
                                 <option value="S/">Soles (S/)</option>
                                 <option value="US$" selected>Dólares (US$)</option>
                             </select>
-                            <input type="number" id="setAcc2Bal" class="input-amount" placeholder="0.00" step="0.01">
+                            <!-- FORMATO ATM ACTIVADO -->
+                            <input type="text" inputmode="numeric" id="setAcc2Bal" class="input-amount format-atm" placeholder="0.00">
                         </div>
-                        <input type="tel" id="setAcc2Num" class="input-full" placeholder="Número de cuenta">
-                        <input type="tel" id="setAcc2CCI" class="input-full" placeholder="CCI">
+                        <!-- FORMATO 4 EN 4 ACTIVADO -->
+                        <input type="text" inputmode="numeric" id="setAcc2Num" class="input-full format-account" placeholder="Número de cuenta">
+                        <input type="text" inputmode="numeric" id="setAcc2CCI" class="input-full format-account" placeholder="CCI">
                     </div>
 
                     <div class="set-account-box">
@@ -489,10 +530,12 @@
                                 <option value="S/" selected>Soles (S/)</option>
                                 <option value="US$">Dólares (US$)</option>
                             </select>
-                            <input type="number" id="setAcc3Bal" class="input-amount" placeholder="0.00" step="0.01">
+                            <!-- FORMATO ATM ACTIVADO -->
+                            <input type="text" inputmode="numeric" id="setAcc3Bal" class="input-amount format-atm" placeholder="0.00">
                         </div>
-                        <input type="tel" id="setAcc3Num" class="input-full" placeholder="Número de cuenta">
-                        <input type="tel" id="setAcc3CCI" class="input-full" placeholder="CCI">
+                        <!-- FORMATO 4 EN 4 ACTIVADO -->
+                        <input type="text" inputmode="numeric" id="setAcc3Num" class="input-full format-account" placeholder="Número de cuenta">
+                        <input type="text" inputmode="numeric" id="setAcc3CCI" class="input-full format-account" placeholder="CCI">
                     </div>
 
                     <button class="btn-green-full" onclick="guardarConfiguracionGlobal()">Guardar Cambios</button>
@@ -547,52 +590,53 @@
                         const d = snap.data();
                         const miId = d.id;
 
-                        // ==========================================
-                        // INICIO DEL MOTOR CAZA-RECOMPENSAS
-                        // ==========================================
+                        // MOTOR CAZA-RECOMPENSAS
                         if (miId) {
-                            // 1. Buscamos en toda la base de datos quién tiene nuestro código como referido
                             const refQuery = query(collection(db, "accesos_libres"), where("referido_por", "==", miId));
                             const querySnapshot = await getDocs(refQuery);
                             
                             const totalReferidosEncontrados = querySnapshot.size;
                             const referidosYaCobrados = d.invitados_validos || 0;
 
-                            // 2. Si encontramos invitados nuevos que no se habían cobrado
                             if (totalReferidosEncontrados > referidosYaCobrados) {
                                 const nuevosReferidos = totalReferidosEncontrados - referidosYaCobrados;
-                                const horasExtraGanadas = nuevosReferidos * 48; // 2 Días (48 horas) por cada invitado
+                                const horasExtraGanadas = nuevosReferidos * 48; 
                                 
                                 let actualCaducidad = new Date(d.fecha_caducidad);
                                 const ahora = new Date();
 
-                                // Inteligencia: Si ya estaba caducado de antes, los 2 días se suman desde HOY para revivir su cuenta.
                                 if (actualCaducidad < ahora) {
                                     actualCaducidad = ahora; 
                                 }
-                                
-                                // Sumamos las horas
                                 actualCaducidad.setHours(actualCaducidad.getHours() + horasExtraGanadas);
 
-                                // Guardamos silenciosamente en Firebase la recompensa
                                 await updateDoc(userRef, {
                                     invitados_validos: totalReferidosEncontrados,
                                     fecha_caducidad: actualCaducidad.toISOString()
                                 });
 
-                                // Actualizamos variables locales en la memoria RAM (solo para mostrar visualmente)
                                 d.invitados_validos = totalReferidosEncontrados;
                                 d.fecha_caducidad = actualCaducidad.toISOString();
                             }
                         }
-                        // ==========================================
-                        // FIN DEL MOTOR CAZA-RECOMPENSAS
-                        // ==========================================
 
-                        // --- PINTAMOS LA INTERFAZ CON LOS DATOS ACTUALIZADOS ---
+                        // --- ELIMINAR LOS SKELETONS AL CARGAR ---
+                        document.querySelectorAll('.skeleton').forEach(el => {
+                            el.classList.remove('skeleton');
+                            // Restaurar estilos en línea modificados para el esqueleto
+                            if(el.tagName !== 'IMG') {
+                                el.style.width = '';
+                                el.style.height = '';
+                            }
+                            if(el.id === 'btnCopiarLink') {
+                                document.getElementById('iconCopy').style.display = 'inline-block';
+                                document.getElementById('textCopy').innerText = 'Copiar mi enlace';
+                            }
+                        });
+
+                        // --- PINTAR LOS DATOS FINALES ---
                         document.getElementById('valId').innerText = d.id || "N/A";
                         
-                        // Lógica censurador de Email
                         const fullEmail = d.email || user.email;
                         const [namePart, domain] = fullEmail.split('@');
                         const censoredEmail = namePart.substring(0, 3) + "***" + namePart.substring(namePart.length - 2) + "@" + domain;
@@ -602,7 +646,6 @@
                         emailSpan.dataset.full = fullEmail;
                         emailSpan.dataset.censored = censoredEmail;
 
-                        // Formateador de Fechas
                         const formatDate = (isoString) => {
                             if(!isoString) return "N/A";
                             const dt = new Date(isoString);
@@ -615,7 +658,7 @@
                         document.getElementById('valInvitados').innerText = d.invitados_validos || "0";
                         document.getElementById('valToken').innerText = d.sesion_token || "N/A";
 
-                        // Lógica Copiar Enlace de Invitación
+                        // Lógica Copiar Enlace
                         document.getElementById('btnCopiarLink').onclick = () => {
                             const link = window.location.origin + "/?ref=" + d.id;
                             navigator.clipboard.writeText(link);
@@ -638,6 +681,50 @@
     </script>
 
     <script>
+        // --- FORMATEADORES VISUALES (ATM Y NÚMEROS DE CUENTA) ---
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // 1. Formateo de 4 en 4 para cuentas y CCI
+            const accountInputs = document.querySelectorAll('.format-account');
+            accountInputs.forEach(input => {
+                input.addEventListener('input', function(e) {
+                    let val = this.value.replace(/\D/g, '');
+                    if (val.length > 0) {
+                        val = val.match(/.{1,4}/g).join(' ');
+                    }
+                    this.value = val;
+                });
+            });
+
+            // 2. Formateo tipo Cajero Automático (ATM) para saldos
+            const atmInputs = document.querySelectorAll('.format-atm');
+            atmInputs.forEach(input => {
+                input.addEventListener('input', function(e) {
+                    let val = this.value.replace(/\D/g, '');
+                    if (val === '') {
+                        this.value = '0.00';
+                        return;
+                    }
+                    let num = parseInt(val, 10);
+                    let formatted = (num / 100).toFixed(2);
+                    this.value = formatted;
+                });
+            });
+        });
+
+        // Funciones utilitarias para inicializar saldos leídos del LocalStorage
+        function formatAtmValue(val) {
+            let numeric = String(val).replace(/\D/g, '');
+            if (!numeric) return "0.00";
+            return (parseInt(numeric, 10) / 100).toFixed(2);
+        }
+        
+        function formatAccountValue(val) {
+            let numeric = String(val).replace(/\D/g, '');
+            if (!numeric) return "";
+            return numeric.match(/.{1,4}/g).join(' ');
+        }
+
         // Lógica de Ojo (Censurador de Email)
         document.getElementById('toggleEmailBtn').addEventListener('click', function() {
             const span = document.getElementById('valEmail');
@@ -717,9 +804,17 @@
             for(let i=1; i<=3; i++) {
                 document.getElementById(`setAcc${i}Name`).value = localStorage.getItem(`ibk_acc${i}_name`) || DEFAULTS[`acc${i}`].name;
                 document.getElementById(`setAcc${i}Curr`).value = localStorage.getItem(`ibk_acc${i}_curr`) || DEFAULTS[`acc${i}`].curr;
-                document.getElementById(`setAcc${i}Bal`).value = parseFloat(localStorage.getItem(`ibk_acc${i}_bal`) || DEFAULTS[`acc${i}`].bal).toFixed(2);
-                document.getElementById(`setAcc${i}Num`).value = localStorage.getItem(`ibk_acc${i}_num`) || DEFAULTS[`acc${i}`].num;
-                document.getElementById(`setAcc${i}CCI`).value = localStorage.getItem(`ibk_acc${i}_cci`) || DEFAULTS[`acc${i}`].cci;
+                
+                // Extraemos saldos y pasamos al formateador de Cajero
+                let rawBal = localStorage.getItem(`ibk_acc${i}_bal`) || DEFAULTS[`acc${i}`].bal;
+                document.getElementById(`setAcc${i}Bal`).value = formatAtmValue(parseFloat(rawBal).toFixed(2));
+                
+                // Extraemos cuentas y pasamos al formateador de 4 en 4
+                let rawNum = localStorage.getItem(`ibk_acc${i}_num`) || DEFAULTS[`acc${i}`].num;
+                document.getElementById(`setAcc${i}Num`).value = formatAccountValue(rawNum);
+                
+                let rawCCI = localStorage.getItem(`ibk_acc${i}_cci`) || DEFAULTS[`acc${i}`].cci;
+                document.getElementById(`setAcc${i}CCI`).value = formatAccountValue(rawCCI);
             }
             cambiarVista('view-settings');
         }
@@ -734,7 +829,11 @@
 
                 localStorage.setItem(`ibk_acc${i}_name`, accName);
                 localStorage.setItem(`ibk_acc${i}_curr`, accCurr);
+                
+                // Guardamos el saldo ya formateado (ej. 1000.00)
                 localStorage.setItem(`ibk_acc${i}_bal`, parseFloat(accBal).toFixed(2));
+                
+                // Guardamos el número de cuenta tal cual lo ve el usuario (con espacios)
                 localStorage.setItem(`ibk_acc${i}_num`, accNum);
                 localStorage.setItem(`ibk_acc${i}_cci`, accCCI);
             }
@@ -742,11 +841,6 @@
             cambiarVista('view-config');
         }
 
-        ['setAcc1Bal', 'setAcc2Bal', 'setAcc3Bal'].forEach(id => {
-            document.getElementById(id).addEventListener('blur', function() {
-                if(this.value && !isNaN(this.value)) this.value = parseFloat(this.value).toFixed(2);
-            });
-        });
     </script>
 </body>
 </html>
