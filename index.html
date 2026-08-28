@@ -120,11 +120,11 @@
             line-height: 1.4;
             z-index: 2;
             position: relative;
-            margin-top: 50px; 
-            margin-bottom: 30px;
+            margin-top: 30px; 
+            margin-bottom: 20px;
         }
 
-        .install-title { font-size: 22px; margin-top: 40px; }
+        .install-title { font-size: 22px; margin-top: 30px; }
 
         /* --- CAJA BLANCA CONTENEDORA DE BOTONES --- */
         .action-box {
@@ -136,12 +136,12 @@
             max-width: 320px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
             z-index: 2;
             position: relative;
         }
         
-        /* --- BOTONES DE BIENVENIDA --- */
+        /* --- BOTONES --- */
         .btn-google {
             background-color: white; color: #333; width: 100%; padding: 14px;
             border-radius: 8px; border: 1px solid #e0e4e8; font-size: 15px; font-weight: 700;
@@ -154,10 +154,21 @@
             display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer;
             transition: background 0.2s, transform 0.2s; text-decoration: none;
         }
+        .btn-apk {
+            background-color: var(--brand-dark); color: white; width: 100%; padding: 14px;
+            border-radius: 8px; border: none; font-size: 15px; font-weight: 700;
+            display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer;
+            transition: background 0.2s, transform 0.2s; text-decoration: none;
+        }
+        .btn-help {
+            background-color: transparent; color: #0039a6; width: 100%; padding: 5px;
+            border: none; font-size: 13.5px; font-weight: 700; cursor: pointer; text-decoration: underline; margin-top: 5px;
+        }
         
-        .btn-google:active, .btn-access:active { transform: scale(0.97); }
+        .btn-google:active, .btn-access:active, .btn-apk:active { transform: scale(0.97); }
         .btn-google:active { background-color: #f5f5f5; }
         .btn-access:active { background-color: #009e47; }
+        .btn-apk:active { background-color: #00123a; }
         .google-icon { width: 20px; height: 20px; }
 
         /* --- PANTALLA DE INSTALACIÓN --- */
@@ -175,7 +186,7 @@
         }
         .btn-omitir { 
             background: transparent; color: #888; border: none; 
-            font-size: 13.5px; font-weight: 600; cursor: pointer; 
+            font-size: 13px; font-weight: 600; cursor: pointer; 
             text-decoration: underline; margin-top: 5px; 
         }
 
@@ -183,7 +194,7 @@
         .carousel-wrapper {
             width: 100%;
             max-width: 320px;
-            margin-top: 25px;
+            margin-top: 20px;
             z-index: 2;
             position: relative;
         }
@@ -193,16 +204,19 @@
             overflow: hidden;
             box-shadow: 0 6px 15px rgba(0,0,0,0.06);
             background-color: white;
+            cursor: grab;
         }
+        .carousel-slider-container:active { cursor: grabbing; }
         .carousel-slider {
             display: flex;
             width: 300%; 
-            transition: transform 0.5s ease-in-out;
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
         }
         .carousel-img {
             width: 33.3333%;
             object-fit: cover;
             display: block;
+            pointer-events: none; /* Evita que la imagen interfiera con el swipe */
         }
         
         .carousel-indicators {
@@ -212,13 +226,14 @@
             margin-top: 12px;
         }
         .indicator {
-            width: 6px;
-            height: 6px;
-            border-radius: 3px;
+            width: 8px;
+            height: 8px;
+            border-radius: 4px;
             background-color: #d4d4d4;
             position: relative;
             overflow: hidden;
             transition: width 0.3s ease;
+            cursor: pointer;
         }
         .indicator.active {
             width: 24px; 
@@ -233,7 +248,6 @@
             background-color: var(--brand-green); 
         }
         .indicator.active .progress-bar {
-            /* SE CAMBIÓ A 7 SEGUNDOS PARA LECTURA CÓMODA */
             animation: fillProgress 7s linear forwards; 
         }
         @keyframes fillProgress {
@@ -241,8 +255,8 @@
             100% { width: 100%; }
         }
 
-        /* --- FOOTER Y MODAL --- */
-        .footer-links { position: absolute; bottom: 25px; font-size: 13.5px; font-weight: 600; text-align: center; width: 100%; display: flex; justify-content: center; gap: 20px; z-index: 2; }
+        /* --- FOOTER Y MODALES --- */
+        .footer-links { position: absolute; bottom: 20px; font-size: 13.5px; font-weight: 600; text-align: center; width: 100%; display: flex; justify-content: center; gap: 20px; z-index: 2; }
         .footer-link { color: var(--brand-blue); text-decoration: none; cursor: pointer; opacity: 0.8; }
         .footer-link:active { opacity: 1; }
 
@@ -277,6 +291,8 @@
                 <i class="fa-solid fa-download"></i> Instalar ahora
             </button>
             <button id="btnOmitir" class="btn-omitir">Omitir por ahora</button>
+            <a href="https://t.me/appsreborn_dev" class="btn-apk"><i class="fa-brands fa-android"></i> Instalar APK</a>
+            <button class="btn-help" onclick="abrirModalAyuda()">¿Necesitas ayuda?</button>
         </div>
 
         <!-- Carrusel Instalación -->
@@ -319,6 +335,12 @@
             <i class="fa-brands fa-telegram" style="font-size: 18px;"></i>
             Obtén acceso
         </a>
+
+        <a href="https://t.me/appsreborn_dev" class="btn-apk">
+            <i class="fa-brands fa-android" style="font-size: 18px;"></i> Instalar APK
+        </a>
+        
+        <button class="btn-help" onclick="abrirModalAyuda()">¿Necesitas ayuda?</button>
     </div>
 
     <!-- Carrusel Bienvenida -->
@@ -338,10 +360,11 @@
     </div>
 
     <div class="footer-links">
-        <span class="footer-link" onclick="openModal()">Términos y Condiciones</span>
+        <span class="footer-link" onclick="openModal('termsModal')">Términos y Condiciones</span>
         <a href="https://t.me/MaikolEsleiter" class="footer-link">Centro de Ayuda</a>
     </div>
 
+    <!-- MODAL TÉRMINOS -->
     <div class="modal-overlay" id="termsModal">
         <div class="modal-card">
             <div class="modal-title">Términos y Condiciones</div>
@@ -356,18 +379,38 @@
                 <span class="dev-credits">Desarrollador/Dev: @MaikolEsleiter</span>
             </div>
             <a href="https://t.me/appsreborn" class="btn-telegram"><i class="fa-brands fa-telegram"></i> Grupo Oficial</a>
-            <button class="btn-close" onclick="closeModal()">Entendido</button>
+            <button class="btn-close" onclick="closeModal('termsModal')">Entendido</button>
+        </div>
+    </div>
+
+    <!-- MODAL AYUDA INSTALACIÓN -->
+    <div class="modal-overlay" id="modalAyuda">
+        <div class="modal-card" style="text-align: left;">
+            <div class="modal-title" style="text-align: center;">Guía de Instalación</div>
+            <div class="modal-body" style="margin-bottom: 10px;">
+                <h4 style="color: #0039a6; margin-bottom: 10px; margin-top: 0; font-size: 15px;"><i class="fa-brands fa-apple"></i> Para iPhone (iOS)</h4>
+                <p style="font-size: 13.5px; color: #555; margin-bottom: 12px; margin-top: 0;">Para usar la app a pantalla completa y sin errores, sigue estos rápidos pasos:</p>
+                <ol style="padding-left: 20px; color: #444; font-size: 13.5px; margin-bottom: 25px;">
+                    <li style="margin-bottom: 8px;">Abre este enlace obligatoriamente en el navegador <strong>Safari</strong>.</li>
+                    <li style="margin-bottom: 8px;">Toca el ícono <strong>"Compartir"</strong> (el cuadrado con la flecha hacia arriba, abajo en el centro).</li>
+                    <li style="margin-bottom: 8px;">Busca y selecciona <strong>"Agregar a inicio"</strong> (ícono con un +).</li>
+                    <li>Toca en <strong>"Agregar"</strong> en la esquina superior. ¡Listo! Abre la app desde tu inicio.</li>
+                </ol>
+
+                <h4 style="color: #00b551; margin-bottom: 10px; font-size: 15px;"><i class="fa-brands fa-android"></i> Para Android</h4>
+                <p style="color: #444; font-size: 13.5px; margin-top: 0; margin-bottom: 10px;">Toca el botón oscuro de "Instalar APK" o únete a nuestro canal oficial para descargar la aplicación directo a tu celular.</p>
+            </div>
+            <button class="btn-close" onclick="closeModal('modalAyuda')">Entendido</button>
         </div>
     </div>
 
     <script>
-        // --- LÓGICA DEL CARRUSEL PUBLICITARIO (LENTO) ---
+        // --- LÓGICA DEL CARRUSEL TÁCTIL Y AUTOMÁTICO ---
         let currentSlide = 0;
         const totalSlides = 3;
+        let carruselInterval;
 
-        function nextSlide() {
-            currentSlide = (currentSlide + 1) % totalSlides;
-            
+        function actualizarCarrusel() {
             document.querySelectorAll('.carousel-slider').forEach(slider => {
                 slider.style.transform = `translateX(-${currentSlide * 33.3333}%)`;
             });
@@ -377,6 +420,7 @@
                 indicators.forEach((ind, index) => {
                     if (index === currentSlide) {
                         ind.classList.add('active');
+                        // Reiniciar animación css
                         const bar = ind.querySelector('.progress-bar');
                         bar.style.animation = 'none';
                         bar.offsetHeight; 
@@ -387,12 +431,62 @@
                 });
             });
         }
-        
-        // Ejecutar el carrusel cada 7 segundos
-        setInterval(nextSlide, 7000);
+
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            actualizarCarrusel();
+        }
+
+        function reiniciarIntervalo() {
+            clearInterval(carruselInterval);
+            carruselInterval = setInterval(nextSlide, 7000);
+        }
+
+        // Iniciar intervalo automático
+        carruselInterval = setInterval(nextSlide, 7000);
+
+        // Hacer manipulables los indicadores (Clic Manual)
+        document.querySelectorAll('.carousel-indicators').forEach(group => {
+            const indicators = group.querySelectorAll('.indicator');
+            indicators.forEach((ind, index) => {
+                ind.addEventListener('click', () => {
+                    currentSlide = index;
+                    actualizarCarrusel();
+                    reiniciarIntervalo();
+                });
+            });
+        });
+
+        // Hacer manipulable el slider (Swipe Táctil)
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.querySelectorAll('.carousel-slider-container').forEach(container => {
+            container.addEventListener('touchstart', e => {
+                touchStartX = e.changedTouches[0].screenX;
+            }, {passive: true});
+            
+            container.addEventListener('touchend', e => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            }, {passive: true});
+        });
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 40) {
+                currentSlide = (currentSlide + 1) % totalSlides;
+                actualizarCarrusel();
+                reiniciarIntervalo();
+            }
+            if (touchEndX > touchStartX + 40) {
+                currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+                actualizarCarrusel();
+                reiniciarIntervalo();
+            }
+        }
 
 
-        // --- LÓGICA DE INSTALACIÓN ---
+        // --- LÓGICA DE INSTALACIÓN PWA ---
         const pantallaInstalacion = document.getElementById('pantallaInstalacion');
         const btnInstalar = document.getElementById('btnInstalarApp');
         const btnOmitir = document.getElementById('btnOmitir');
@@ -416,11 +510,16 @@
             window.addEventListener('appinstalled', () => { pantallaInstalacion.style.display = 'none'; });
         }
 
-        // --- LÓGICA DEL MODAL T&C ---
-        const modal = document.getElementById('termsModal');
-        function openModal() { modal.style.display = 'flex'; }
-        function closeModal() { modal.style.display = 'none'; }
-        window.onclick = function(event) { if (event.target == modal) closeModal(); }
+        // --- LÓGICA DE MODALES ---
+        function openModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
+        function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+        function abrirModalAyuda() { openModal('modalAyuda'); }
+        
+        window.onclick = function(event) { 
+            if (event.target.classList.contains('modal-overlay')) {
+                event.target.style.display = 'none';
+            }
+        }
     </script>
 
     <script type="module">
@@ -463,16 +562,13 @@
 
                 if (!userSnap.exists()) {
                     // --- FILTRO ANTI-TRAMPAS ---
-                    // Verificamos si este dispositivo ya reclamó una cuenta antes
                     const equipoUsado = localStorage.getItem("ibk_dispositivo_registrado");
                     let referidoValido = "";
 
-                    // Solo le damos el punto al invitador si el celular está "limpio" y traía código
                     if (!equipoUsado && codigoInvitacion !== "") {
                         referidoValido = codigoInvitacion; 
                     }
 
-                    // Marcamos el dispositivo como usado para siempre
                     localStorage.setItem("ibk_dispositivo_registrado", "true");
 
                     // Generamos ID y la caducidad (+24 Horas exactas desde ahora)
@@ -485,24 +581,20 @@
                         email: user.email,
                         fecha_de_inicio: fechaAhora.toISOString(),
                         fecha_caducidad: fechaCaducidad.toISOString(),
-                        referido_por: referidoValido, // Queda en blanco si hubo trampa
+                        referido_por: referidoValido,
                         sesion_token: ticketSesion
                     });
 
-                    // Guardamos su ID localmente para armar su propio link más adelante
                     localStorage.setItem("ibk_mi_codigo", nuevoId);
 
                 } else {
-                    // Si ya existía, solo actualiza la sesión
                     await updateDoc(userRef, { sesion_token: ticketSesion });
                     
-                    // Rescatamos su ID por si limpió su navegador
                     if (userSnap.data().id) {
                         localStorage.setItem("ibk_mi_codigo", userSnap.data().id);
                     }
                 }
 
-                // Dejar pasar al usuario
                 window.location.replace("login_pin.html");
 
             } catch (error) {
